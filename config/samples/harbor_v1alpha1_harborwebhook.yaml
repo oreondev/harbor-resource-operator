@@ -1,0 +1,34 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborWebhook
+metadata:
+  name: ci-notifications
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  projectRef:
+    name: team-payments
+  name: ci-notifications
+  description: Tell CI about pushes and scan results
+  eventTypes:
+  - PUSH_ARTIFACT
+  - SCANNING_COMPLETED
+  - SCANNING_FAILED
+  targets:
+  - type: http
+    address: https://ci.example.com/hooks/harbor
+    payloadFormat: CloudEvents
+    # Sent as the Authorization header; the value never appears in status or events.
+    authHeaderSecretRef:
+      name: ci-webhook-auth
+      key: authorization
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ci-webhook-auth
+  namespace: team-payments
+type: Opaque
+stringData:
+  authorization: Bearer change-me

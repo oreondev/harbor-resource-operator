@@ -1,0 +1,15 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborGarbageCollection
+metadata:
+  name: harbor-gc
+  namespace: harbor-system
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  # Hourly, Daily, Weekly, None, or a six-field cron.
+  schedule: "0 0 4 * * 0"
+  deleteUntagged: true
+  workers: 2
+  # Retain leaves the schedule in Harbor when this object is deleted.
+  deletionPolicy: Retain

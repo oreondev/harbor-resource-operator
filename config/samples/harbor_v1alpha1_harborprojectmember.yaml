@@ -1,0 +1,17 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborProjectMember
+metadata:
+  name: payments-developers
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  projectRef:
+    name: team-payments
+  # Exactly one of user or group. The user must already exist in Harbor
+  # (or be resolvable through LDAP/OIDC).
+  group:
+    name: payments-developers
+    type: oidc
+  role: developer

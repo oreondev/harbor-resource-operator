@@ -1,0 +1,14 @@
+## Append samples of your project ##
+resources:
+- harbor_v1alpha1_harborconnection.yaml
+- harbor_v1alpha1_harborproject.yaml
+- harbor_v1alpha1_harborrobotaccount.yaml
+- harbor_v1alpha1_harborregistry.yaml
+- harbor_v1alpha1_harborreplicationpolicy.yaml
+- harbor_v1alpha1_harborprojectmember.yaml
+- harbor_v1alpha1_harborlabel.yaml
+- harbor_v1alpha1_harborimmutablerule.yaml
+- harbor_v1alpha1_harborwebhook.yaml
+- harbor_v1alpha1_harborretentionpolicy.yaml
+- harbor_v1alpha1_harborgarbagecollection.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

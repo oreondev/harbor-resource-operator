@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prod-harbor-admin
+  namespace: harbor-system
+type: Opaque
+stringData:
+  username: admin                   # or a system robot with permissions for the kinds you use
+  password: change-me
+---
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborConnection
+metadata:
+  name: prod-harbor
+  namespace: harbor-system
+spec:
+  url: https://harbor.example.com
+  credentialsSecretRef:
+    name: prod-harbor-admin
+  allowedNamespaces: ["*"]
+  syncPeriod: 10m

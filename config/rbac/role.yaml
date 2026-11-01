@@ -1,0 +1,81 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - harbor.oreonit.com
+  resources:
+  - harborconnections
+  - harborgarbagecollections
+  - harborimmutablerules
+  - harborlabels
+  - harborprojectmembers
+  - harborprojects
+  - harborregistries
+  - harborreplicationpolicies
+  - harborretentionpolicies
+  - harborrobotaccounts
+  - harborwebhooks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - harbor.oreonit.com
+  resources:
+  - harborconnections/finalizers
+  - harborgarbagecollections/finalizers
+  - harborimmutablerules/finalizers
+  - harborlabels/finalizers
+  - harborprojectmembers/finalizers
+  - harborprojects/finalizers
+  - harborregistries/finalizers
+  - harborreplicationpolicies/finalizers
+  - harborretentionpolicies/finalizers
+  - harborrobotaccounts/finalizers
+  - harborwebhooks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - harbor.oreonit.com
+  resources:
+  - harborconnections/status
+  - harborgarbagecollections/status
+  - harborimmutablerules/status
+  - harborlabels/status
+  - harborprojectmembers/status
+  - harborprojects/status
+  - harborregistries/status
+  - harborreplicationpolicies/status
+  - harborretentionpolicies/status
+  - harborrobotaccounts/status
+  - harborwebhooks/status
+  verbs:
+  - get
+  - patch
+  - update

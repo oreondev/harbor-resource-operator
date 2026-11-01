@@ -1,0 +1,47 @@
+name: E2E Tests
+
+# Pushes and pull requests run against the newest supported Harbor.
+# The nightly run and manual runs cover every supported Harbor minor; the
+# nightly run tests develop, where changes land before a release.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: e2e-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  test-e2e:
+    permissions:
+      contents: read
+    name: Harbor ${{ matrix.harbor.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        harbor: ${{ fromJSON((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '[{"chart":"1.16.4","app":"2.12"},{"chart":"1.17.5","app":"2.13"},{"chart":"1.18.4","app":"2.14"},{"chart":"1.19.4","app":"2.15"}]' || '[{"chart":"1.19.4","app":"2.15"}]') }}
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
+
+      - name: Setup Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+
+      - name: Run e2e against Harbor ${{ matrix.harbor.app }}
+        env:
+          HARBOR_CHART_VERSION: ${{ matrix.harbor.chart }}
+          HARBOR_VERSION: ${{ matrix.harbor.app }}
+        run: make test-e2e HARBOR_CHART_VERSION="$HARBOR_CHART_VERSION"

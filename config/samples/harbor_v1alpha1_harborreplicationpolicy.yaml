@@ -1,0 +1,21 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborReplicationPolicy
+metadata:
+  name: releases-to-edge
+  namespace: platform
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  direction: push
+  destRegistryRef:
+    name: edge-eu-west
+  destNamespace: payments
+  filters:
+  - { type: name, value: "payments/**" }
+  - { type: tag, value: "v*", decoration: matches }
+  trigger:
+    type: scheduled
+    cron: "0 0 2 * * *"
+  override: true
+  singleActiveReplication: true

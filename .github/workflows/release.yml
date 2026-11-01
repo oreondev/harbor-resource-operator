@@ -1,0 +1,191 @@
+name: Release
+
+# A vX.Y.Z tag on main publishes a release: the multi-arch image (signed with
+# cosign, with SBOM and provenance), the Helm chart as an OCI artifact, and a
+# GitHub release with install.yaml. Pushes to develop publish an edge image
+# tagged "develop" and "sha-<commit>" for testing; it is not a release.
+on:
+  push:
+    branches: [develop]
+    tags: ["v*.*.*"]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/oreondev/harbor-resource-operator
+  CHART_REPO: oci://ghcr.io/oreondev/charts
+  PLATFORMS: linux/amd64,linux/arm64,linux/s390x,linux/ppc64le
+
+jobs:
+  check:
+    name: Check and test
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Work out the version
+        id: version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$REF_TYPE" != tag ]; then
+            echo "version=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          version="${REF_NAME#v}"
+          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::tag $REF_NAME is not vMAJOR.MINOR.PATCH"; exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::tag $REF_NAME is not on main"; exit 1
+          fi
+          make_version=$(sed -n 's/^VERSION ?= //p' Makefile)
+          if [ "$make_version" != "$version" ]; then
+            echo "::error::Makefile VERSION is $make_version, tag is $version; bump VERSION and regenerate the installer and chart first"; exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: make test
+
+      - name: Run linter
+        run: make lint
+
+  publish:
+    name: Publish
+    needs: check
+    permissions:
+      contents: write   # GitHub release
+      packages: write   # image and chart on ghcr.io
+      id-token: write   # keyless cosign signing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image tags and labels
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=sha,prefix=sha-,format=short,enable=${{ github.ref == 'refs/heads/develop' }}
+          labels: |
+            org.opencontainers.image.title=Harbor Resource Operator
+            org.opencontainers.image.description=Manage Harbor projects, robot accounts, replication and more as Kubernetes resources
+            org.opencontainers.image.licenses=Apache-2.0
+
+      - name: Build and push the image
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          sbom: true
+          provenance: mode=max
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign the image
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: cosign sign --yes "$IMAGE@$DIGEST"
+
+      - name: Setup Go
+        if: github.ref_type == 'tag'
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+
+      - name: Build install.yaml
+        if: github.ref_type == 'tag'
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: make build-installer VERSION="$VERSION"
+
+      - name: Package and push the Helm chart
+        if: github.ref_type == 'tag'
+        id: chart
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          make install-helm
+          sed -i "s/^    tag: .*/    tag: \"$VERSION\"/" charts/chart/values.yaml
+          grep -q "tag: \"$VERSION\"" charts/chart/values.yaml
+          helm package charts/chart --version "$VERSION" --app-version "$VERSION" --destination dist
+          echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GH_ACTOR" --password-stdin
+          out=$(helm push "dist/harbor-resource-operator-$VERSION.tgz" "$CHART_REPO" 2>&1)
+          echo "$out"
+          echo "digest=$(echo "$out" | sed -n 's/^Digest: //p')" >> "$GITHUB_OUTPUT"
+
+      - name: Sign the Helm chart
+        if: github.ref_type == 'tag'
+        env:
+          DIGEST: ${{ steps.chart.outputs.digest }}
+        run: cosign sign --yes "ghcr.io/oreondev/charts/harbor-resource-operator@$DIGEST"
+
+      - name: Create the GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.check.outputs.version }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          cat > notes.md <<EOF
+          Image: \`$IMAGE:$VERSION\` (\`$DIGEST\`), signed with cosign (keyless, GitHub Actions OIDC).
+
+          Install with Helm:
+
+          \`\`\`
+          helm install harbor-resource-operator $CHART_REPO/harbor-resource-operator --version $VERSION \\
+            --namespace harbor-resource-operator-system --create-namespace
+          \`\`\`
+
+          or with kubectl:
+
+          \`\`\`
+          kubectl apply -f https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/install.yaml
+          \`\`\`
+          EOF
+          gh release create "$TAG" dist/install.yaml "dist/harbor-resource-operator-$VERSION.tgz" \
+            --verify-tag --title "$TAG" --notes-file notes.md --generate-notes

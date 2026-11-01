@@ -1,0 +1,17 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborImmutableRule
+metadata:
+  name: release-tags
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  projectRef:
+    name: team-payments
+  # Tags matching v*.*.* in every repository can never be overwritten.
+  repositories:
+    pattern: "**"
+  tags:
+    decoration: matches
+    pattern: "v*.*.*"

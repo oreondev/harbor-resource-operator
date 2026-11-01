@@ -1,0 +1,58 @@
+resources:
+# All RBAC will be applied under this service account in
+# the deployment namespace. You may comment out this resource
+# if your manager will use a service account that exists at
+# runtime. Be sure to update RoleBinding and ClusterRoleBinding
+# subjects if changing service account names.
+- service_account.yaml
+- role.yaml
+- role_binding.yaml
+- leader_election_role.yaml
+- leader_election_role_binding.yaml
+# The following RBAC configurations are used to protect
+# the metrics endpoint with authn/authz. These configurations
+# ensure that only authorized users and service accounts
+# can access the metrics endpoint. Comment the following
+# permissions if you want to disable this protection.
+# More info: https://book.kubebuilder.io/reference/metrics.html
+- metrics_auth_role.yaml
+- metrics_auth_role_binding.yaml
+- metrics_reader_role.yaml
+# For each CRD, "Admin", "Editor" and "Viewer" roles are scaffolded by
+# default, aiding admins in cluster management. Those roles are
+# not used by the harbor-resource-operator itself. You can comment the following lines
+# if you do not want those helpers be installed with your Project.
+- harborgarbagecollection_admin_role.yaml
+- harborgarbagecollection_editor_role.yaml
+- harborgarbagecollection_viewer_role.yaml
+- harborretentionpolicy_admin_role.yaml
+- harborretentionpolicy_editor_role.yaml
+- harborretentionpolicy_viewer_role.yaml
+- harborwebhook_admin_role.yaml
+- harborwebhook_editor_role.yaml
+- harborwebhook_viewer_role.yaml
+- harborimmutablerule_admin_role.yaml
+- harborimmutablerule_editor_role.yaml
+- harborimmutablerule_viewer_role.yaml
+- harborlabel_admin_role.yaml
+- harborlabel_editor_role.yaml
+- harborlabel_viewer_role.yaml
+- harborprojectmember_admin_role.yaml
+- harborprojectmember_editor_role.yaml
+- harborprojectmember_viewer_role.yaml
+- harborreplicationpolicy_admin_role.yaml
+- harborreplicationpolicy_editor_role.yaml
+- harborreplicationpolicy_viewer_role.yaml
+- harborregistry_admin_role.yaml
+- harborregistry_editor_role.yaml
+- harborregistry_viewer_role.yaml
+- harborrobotaccount_admin_role.yaml
+- harborrobotaccount_editor_role.yaml
+- harborrobotaccount_viewer_role.yaml
+- harborproject_admin_role.yaml
+- harborproject_editor_role.yaml
+- harborproject_viewer_role.yaml
+- harborconnection_admin_role.yaml
+- harborconnection_editor_role.yaml
+- harborconnection_viewer_role.yaml
+

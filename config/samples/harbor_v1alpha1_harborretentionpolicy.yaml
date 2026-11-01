@@ -1,0 +1,25 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborRetentionPolicy
+metadata:
+  name: payments-retention
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  projectRef:
+    name: team-payments
+  # Harbor keeps an artifact if any rule retains it.
+  rules:
+  - template: latestPushedK
+    count: 10
+    repositories:
+      pattern: "**"
+    tags:
+      pattern: "**"
+      untagged: false
+  - template: always
+    tags:
+      pattern: "v*.*.*"
+  # Six-field cron (seconds first), as Harbor expects. Empty means manual only.
+  schedule: "0 0 3 * * *"

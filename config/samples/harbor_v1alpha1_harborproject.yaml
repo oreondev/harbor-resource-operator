@@ -1,0 +1,18 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborProject
+metadata:
+  name: team-payments
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  name: payments
+  public: false
+  storageQuotaBytes: 53687091200
+  metadata:
+    autoScan: true
+    preventVulnerable: true
+    severity: critical
+    reuseSystemCVEAllowlist: true
+  deletionPolicy: Retain

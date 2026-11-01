@@ -1,0 +1,25 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborRobotAccount
+metadata:
+  name: payments-ci
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  name: ci
+  level: project
+  projectRef:
+    name: team-payments
+  description: CI pipeline push
+  duration: 90
+  permissions:
+  - access:
+    - { resource: repository, action: push }
+    - { resource: repository, action: pull }
+    - { resource: artifact, action: read }
+  secret:
+    name: payments-ci-regcred
+    type: kubernetes.io/dockerconfigjson
+  rotation:
+    beforeExpiry: 168h

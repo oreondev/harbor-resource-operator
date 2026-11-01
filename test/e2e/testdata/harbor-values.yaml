@@ -1,0 +1,18 @@
+# Minimal Harbor for e2e on kind: plain HTTP behind a ClusterIP service,
+# no persistence, no Trivy. Not for anything but tests.
+expose:
+  type: clusterIP
+  tls:
+    enabled: false
+  clusterIP:
+    name: harbor
+    ports:
+      httpPort: 80
+externalURL: http://harbor.harbor.svc.cluster.local
+harborAdminPassword: Harbor12345
+persistence:
+  enabled: false
+trivy:
+  enabled: false
+metrics:
+  enabled: false

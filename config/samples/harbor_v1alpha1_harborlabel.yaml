@@ -1,0 +1,15 @@
+apiVersion: harbor.oreonit.com/v1alpha1
+kind: HarborLabel
+metadata:
+  name: release-candidate
+  namespace: team-payments
+spec:
+  connectionRef:
+    name: prod-harbor
+    namespace: harbor-system
+  name: release-candidate
+  scope: project
+  projectRef:
+    name: team-payments
+  color: "#2E7D32"
+  description: Artifacts promoted to staging
