@@ -71,6 +71,21 @@ jobs:
       - name: Run linter
         run: make lint
 
+      # Checked before anything is published, so a stale bundle cannot leave a half-published release.
+      - name: Check the OLM bundle
+        if: github.ref_type == 'tag'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          csv=bundle/manifests/harbor-resource-operator.clusterserviceversion.yaml
+          if ! grep -q "^  version: $VERSION$" "$csv"; then
+            echo "::error::bundle/ is not for $VERSION; run make bundle in the release bump"; exit 1
+          fi
+          if ! grep -q "^    containerImage: $IMAGE:$VERSION$" "$csv"; then
+            echo "::error::bundle/ containerImage is not $IMAGE:$VERSION; run make bundle in the release bump"; exit 1
+          fi
+          make bundle-validate
+
   publish:
     name: Publish
     needs: check
@@ -165,18 +180,11 @@ jobs:
           DIGEST: ${{ steps.chart.outputs.digest }}
         run: ./hack/cosign-sign.sh "ghcr.io/oreondev/charts/harbor-resource-operator@$DIGEST"
 
-      - name: Check the OLM bundle
+      - name: Package the OLM bundle
         if: github.ref_type == 'tag'
         env:
           VERSION: ${{ needs.check.outputs.version }}
-        run: |
-          csv=bundle/manifests/harbor-resource-operator.clusterserviceversion.yaml
-          if ! grep -q "^  version: $VERSION$" "$csv"; then
-            echo "::error::bundle/ is not for $VERSION; run make bundle in the release bump"; exit 1
-          fi
-          grep -q "^    containerImage: $IMAGE:$VERSION$" "$csv"
-          make bundle-validate
-          tar -czf "dist/harbor-resource-operator-bundle-$VERSION.tgz" bundle
+        run: tar -czf "dist/harbor-resource-operator-bundle-$VERSION.tgz" bundle
 
       - name: Build and push the bundle image
         if: github.ref_type == 'tag'
