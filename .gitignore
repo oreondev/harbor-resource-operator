@@ -31,3 +31,6 @@ go.work
 
 # Private notes for Claude Code
 CLAUDE.local.md
+
+# Claude Code worktrees
+.claude/worktrees/
