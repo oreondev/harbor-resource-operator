@@ -27,6 +27,7 @@ import (
 type HarborImmutableRuleSpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	ProjectReference `json:",inline"`
@@ -34,27 +35,33 @@ type HarborImmutableRuleSpec struct {
 	// repositories selects the repositories the rule applies to. Defaults to all.
 	// +optional
 	// +kubebuilder:default={}
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Repositories"
 	Repositories PatternSelector `json:"repositories,omitzero"`
 
 	// tags selects the tags made immutable, for example pattern "v*".
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Tags"
 	Tags PatternSelector `json:"tags"`
 
 	// disabled keeps the rule in Harbor without enforcing it.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Disabled"
 	Disabled bool `json:"disabled,omitempty"`
 
 	// adoptExisting takes over an existing rule with the same selectors.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the rule is deleted with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -80,6 +87,7 @@ type HarborImmutableRuleStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -91,8 +99,9 @@ type HarborImmutableRuleStatus struct {
 // +kubebuilder:printcolumn:name="Tags",type=string,JSONPath=".spec.tags.pattern"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Immutable Rule",resources={{HarborConnection,v1alpha1,""},{HarborProject,v1alpha1,""}}
 
-// HarborImmutableRule is the Schema for the harborimmutablerules API
+// HarborImmutableRule manages a tag immutability rule in a Harbor project.
 type HarborImmutableRule struct {
 	metav1.TypeMeta `json:",inline"`
 

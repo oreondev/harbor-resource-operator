@@ -79,6 +79,7 @@ type RetentionRule struct {
 type HarborRetentionPolicySpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	ProjectReference `json:",inline"`
@@ -87,24 +88,29 @@ type HarborRetentionPolicySpec struct {
 	// +required
 	// +kubebuilder:validation:MinItems=1
 	// +kubebuilder:validation:MaxItems=15
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Rules"
 	Rules []RetentionRule `json:"rules"`
 
 	// schedule is a six-field cron expression (seconds first), for example
 	// "0 0 2 * * *". Empty means the policy only runs when triggered by hand.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Schedule"
 	Schedule string `json:"schedule,omitempty"`
 
 	// adoptExisting takes over the project's existing retention policy.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the policy is deleted with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -130,6 +136,7 @@ type HarborRetentionPolicyStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -140,8 +147,9 @@ type HarborRetentionPolicyStatus struct {
 // +kubebuilder:printcolumn:name="Schedule",type=string,JSONPath=".spec.schedule"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Retention Policy",resources={{HarborConnection,v1alpha1,""},{HarborProject,v1alpha1,""}}
 
-// HarborRetentionPolicy is the Schema for the harborretentionpolicies API
+// HarborRetentionPolicy manages the tag retention policy of a Harbor project.
 type HarborRetentionPolicy struct {
 	metav1.TypeMeta `json:",inline"`
 

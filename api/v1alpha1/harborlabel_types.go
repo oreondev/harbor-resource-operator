@@ -37,16 +37,19 @@ const (
 type HarborLabelSpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	// name of the label in Harbor. Defaults to metadata.name.
 	// +optional
 	// +kubebuilder:validation:MaxLength=128
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Name"
 	Name string `json:"name,omitempty"`
 
 	// scope is project (default) or global. Global labels need a system administrator connection.
 	// +optional
 	// +kubebuilder:default=project
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Scope"
 	Scope LabelScope `json:"scope,omitempty"`
 
 	ProjectReference `json:",inline"`
@@ -54,24 +57,29 @@ type HarborLabelSpec struct {
 	// color as #RRGGBB. Unset leaves the color as Harbor has it.
 	// +optional
 	// +kubebuilder:validation:Pattern=`^#[0-9A-Fa-f]{6}$`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Color"
 	Color string `json:"color,omitempty"`
 
 	// description shown in Harbor. Unset leaves it as Harbor has it.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Description"
 	Description *string `json:"description,omitempty"`
 
 	// adoptExisting takes over a label of the same name in the same scope.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the label is deleted with this object.
 	// Deleting a label removes it from every artifact that carries it.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -93,6 +101,7 @@ type HarborLabelStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -103,8 +112,9 @@ type HarborLabelStatus struct {
 // +kubebuilder:printcolumn:name="ID",type=integer,JSONPath=".status.labelID"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Label",resources={{HarborConnection,v1alpha1,""},{HarborProject,v1alpha1,""}}
 
-// HarborLabel is the Schema for the harborlabels API
+// HarborLabel manages a global or project label in Harbor.
 type HarborLabel struct {
 	metav1.TypeMeta `json:",inline"`
 

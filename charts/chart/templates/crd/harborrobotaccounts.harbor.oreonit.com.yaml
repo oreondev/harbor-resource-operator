@@ -38,8 +38,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborRobotAccount is the Schema for the harborrobotaccounts
-          API
+        description: HarborRobotAccount manages a Harbor robot account and writes
+          its credentials to a Secret.
         properties:
           apiVersion:
             description: |-
