@@ -1,0 +1,6 @@
+# Input for "make bundle": the default install plus samples (for the CSV
+# alm-examples) and the scorecard config. operator-sdk turns this into bundle/.
+resources:
+- ../default
+- samples
+- ../scorecard
