@@ -1,0 +1,670 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborConnection",
+          "metadata": {
+            "name": "prod-harbor",
+            "namespace": "harbor-system"
+          },
+          "spec": {
+            "allowedNamespaces": [
+              "*"
+            ],
+            "credentialsSecretRef": {
+              "name": "prod-harbor-admin"
+            },
+            "syncPeriod": "10m",
+            "url": "https://harbor.example.com"
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborGarbageCollection",
+          "metadata": {
+            "name": "harbor-gc",
+            "namespace": "harbor-system"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "deleteUntagged": true,
+            "deletionPolicy": "Retain",
+            "schedule": "0 0 4 * * 0",
+            "workers": 2
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborImmutableRule",
+          "metadata": {
+            "name": "release-tags",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "projectRef": {
+              "name": "team-payments"
+            },
+            "repositories": {
+              "pattern": "**"
+            },
+            "tags": {
+              "decoration": "matches",
+              "pattern": "v*.*.*"
+            }
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborLabel",
+          "metadata": {
+            "name": "release-candidate",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "color": "#2E7D32",
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "description": "Artifacts promoted to staging",
+            "name": "release-candidate",
+            "projectRef": {
+              "name": "team-payments"
+            },
+            "scope": "project"
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborProject",
+          "metadata": {
+            "name": "team-payments",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "deletionPolicy": "Retain",
+            "metadata": {
+              "autoScan": true,
+              "preventVulnerable": true,
+              "reuseSystemCVEAllowlist": true,
+              "severity": "critical"
+            },
+            "name": "payments",
+            "public": false,
+            "storageQuotaBytes": 53687091200
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborProjectMember",
+          "metadata": {
+            "name": "payments-developers",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "group": {
+              "name": "payments-developers",
+              "type": "oidc"
+            },
+            "projectRef": {
+              "name": "team-payments"
+            },
+            "role": "developer"
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborRegistry",
+          "metadata": {
+            "name": "edge-eu-west",
+            "namespace": "platform"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "credentialsSecretRef": {
+              "name": "edge-eu-west-creds"
+            },
+            "description": "Edge site EU West",
+            "type": "harbor",
+            "url": "https://harbor.eu-west.example.com"
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborReplicationPolicy",
+          "metadata": {
+            "name": "releases-to-edge",
+            "namespace": "platform"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "destNamespace": "payments",
+            "destRegistryRef": {
+              "name": "edge-eu-west"
+            },
+            "direction": "push",
+            "filters": [
+              {
+                "type": "name",
+                "value": "payments/**"
+              },
+              {
+                "decoration": "matches",
+                "type": "tag",
+                "value": "v*"
+              }
+            ],
+            "override": true,
+            "singleActiveReplication": true,
+            "trigger": {
+              "cron": "0 0 2 * * *",
+              "type": "scheduled"
+            }
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborRetentionPolicy",
+          "metadata": {
+            "name": "payments-retention",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "projectRef": {
+              "name": "team-payments"
+            },
+            "rules": [
+              {
+                "count": 10,
+                "repositories": {
+                  "pattern": "**"
+                },
+                "tags": {
+                  "pattern": "**",
+                  "untagged": false
+                },
+                "template": "latestPushedK"
+              },
+              {
+                "tags": {
+                  "pattern": "v*.*.*"
+                },
+                "template": "always"
+              }
+            ],
+            "schedule": "0 0 3 * * *"
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborRobotAccount",
+          "metadata": {
+            "name": "payments-ci",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "description": "CI pipeline push",
+            "duration": 90,
+            "level": "project",
+            "name": "ci",
+            "permissions": [
+              {
+                "access": [
+                  {
+                    "action": "push",
+                    "resource": "repository"
+                  },
+                  {
+                    "action": "pull",
+                    "resource": "repository"
+                  },
+                  {
+                    "action": "read",
+                    "resource": "artifact"
+                  }
+                ]
+              }
+            ],
+            "projectRef": {
+              "name": "team-payments"
+            },
+            "rotation": {
+              "beforeExpiry": "168h"
+            },
+            "secret": {
+              "name": "payments-ci-regcred",
+              "type": "kubernetes.io/dockerconfigjson"
+            }
+          }
+        },
+        {
+          "apiVersion": "harbor.oreonit.com/v1alpha1",
+          "kind": "HarborWebhook",
+          "metadata": {
+            "name": "ci-notifications",
+            "namespace": "team-payments"
+          },
+          "spec": {
+            "connectionRef": {
+              "name": "prod-harbor",
+              "namespace": "harbor-system"
+            },
+            "description": "Tell CI about pushes and scan results",
+            "eventTypes": [
+              "PUSH_ARTIFACT",
+              "SCANNING_COMPLETED",
+              "SCANNING_FAILED"
+            ],
+            "name": "ci-notifications",
+            "projectRef": {
+              "name": "team-payments"
+            },
+            "targets": [
+              {
+                "address": "https://ci.example.com/hooks/harbor",
+                "authHeaderSecretRef": {
+                  "key": "authorization",
+                  "name": "ci-webhook-auth"
+                },
+                "payloadFormat": "CloudEvents",
+                "type": "http"
+              }
+            ]
+          }
+        }
+      ]
+    capabilities: Seamless Upgrades
+    categories: Integration & Delivery, Developer Tools
+    containerImage: ghcr.io/oreondev/harbor-resource-operator:0.1.0
+    createdAt: "2026-11-01T17:18:34Z"
+    description: Manage Harbor projects, robot accounts, replication, retention and
+      webhooks as Kubernetes resources. Does not install Harbor.
+    features.operators.openshift.io/cnf: "false"
+    features.operators.openshift.io/cni: "false"
+    features.operators.openshift.io/csi: "false"
+    features.operators.openshift.io/disconnected: "false"
+    features.operators.openshift.io/fips-compliant: "false"
+    features.operators.openshift.io/proxy-aware: "true"
+    features.operators.openshift.io/tls-profiles: "false"
+    features.operators.openshift.io/token-auth-aws: "false"
+    features.operators.openshift.io/token-auth-azure: "false"
+    features.operators.openshift.io/token-auth-gcp: "false"
+    operators.operatorframework.io/builder: operator-sdk-v1.42.3
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
+    repository: https://github.com/oreondev/harbor-resource-operator
+    support: https://github.com/oreondev/harbor-resource-operator/issues
+  labels:
+    operatorframework.io/arch.amd64: supported
+    operatorframework.io/arch.arm64: supported
+    operatorframework.io/arch.ppc64le: supported
+    operatorframework.io/arch.s390x: supported
+    operatorframework.io/os.linux: supported
+  name: harbor-resource-operator.v0.1.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: HarborConnection is the Schema for the harborconnections API
+      displayName: Harbor Connection
+      kind: HarborConnection
+      name: harborconnections.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborGarbageCollection is the Schema for the harborgarbagecollections
+        API
+      displayName: Harbor Garbage Collection
+      kind: HarborGarbageCollection
+      name: harborgarbagecollections.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborImmutableRule is the Schema for the harborimmutablerules
+        API
+      displayName: Harbor Immutable Rule
+      kind: HarborImmutableRule
+      name: harborimmutablerules.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborLabel is the Schema for the harborlabels API
+      displayName: Harbor Label
+      kind: HarborLabel
+      name: harborlabels.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborProjectMember is the Schema for the harborprojectmembers
+        API
+      displayName: Harbor Project Member
+      kind: HarborProjectMember
+      name: harborprojectmembers.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborProject is the Schema for the harborprojects API
+      displayName: Harbor Project
+      kind: HarborProject
+      name: harborprojects.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborRegistry is the Schema for the harborregistries API
+      displayName: Harbor Registry
+      kind: HarborRegistry
+      name: harborregistries.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborReplicationPolicy is the Schema for the harborreplicationpolicies
+        API
+      displayName: Harbor Replication Policy
+      kind: HarborReplicationPolicy
+      name: harborreplicationpolicies.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborRetentionPolicy is the Schema for the harborretentionpolicies
+        API
+      displayName: Harbor Retention Policy
+      kind: HarborRetentionPolicy
+      name: harborretentionpolicies.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborRobotAccount is the Schema for the harborrobotaccounts API
+      displayName: Harbor Robot Account
+      kind: HarborRobotAccount
+      name: harborrobotaccounts.harbor.oreonit.com
+      version: v1alpha1
+    - description: HarborWebhook is the Schema for the harborwebhooks API
+      displayName: Harbor Webhook
+      kind: HarborWebhook
+      name: harborwebhooks.harbor.oreonit.com
+      version: v1alpha1
+  description: |
+    The Harbor Resource Operator manages objects **inside** a running
+    [Harbor](https://goharbor.io) through its REST API, so Harbor configuration
+    can be kept next to the workloads that use it:
+
+    - projects, with quotas and scanning settings
+    - robot accounts, with the token written to a Kubernetes Secret and rotated before it expires
+    - replication endpoints and replication policies
+    - project members, labels, immutable tag rules, webhooks and tag retention
+    - the garbage collection schedule
+
+    It does **not** install, upgrade or back up Harbor. Install Harbor with the
+    [official Helm chart](https://github.com/goharbor/harbor-helm) first.
+
+    ### Getting started
+
+    1. Create a Secret with a Harbor user that may manage the kinds you use, in
+       the namespace of the HarborConnection:
+
+       ```
+       kubectl create namespace harbor-system
+       kubectl -n harbor-system create secret generic prod-harbor-admin \
+         --from-literal=username=<harbor user> --from-literal=password=<password>
+       ```
+
+    2. Create a `HarborConnection` that points at Harbor and names that Secret
+       in `credentialsSecretRef`. Its `allowedNamespaces` controls which
+       namespaces may use it.
+    3. Create projects, robot accounts and the other kinds in those namespaces,
+       each with a `connectionRef` to the connection.
+
+    The examples reference Secrets that you create yourself:
+    `prod-harbor-admin` (Harbor credentials, keys `username` and `password`),
+    `edge-eu-west-creds` (remote registry, keys `accessKey` and `accessSecret`)
+    and `ci-webhook-auth` (webhook `Authorization` header, key `authorization`).
+    Credentials are never logged or written to status or events.
+
+    Supported: Harbor 2.12 to 2.15, Kubernetes 1.34 and later. The operator
+    watches all namespaces.
+
+    This is an independent community project. It is not affiliated with or
+    endorsed by the Harbor project or the CNCF.
+  displayName: Harbor Resource Operator
+  icon:
+  - base64data: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4IiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+CiAgPHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIHJ4PSIyNCIgZmlsbD0iIzFkNGY5MSIvPgogIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTY0IDI2IEw5NiA0NCBMOTYgODQgTDY0IDEwMiBMMzIgODQgTDMyIDQ0IFoiLz4KICAgIDxwYXRoIGQ9Ik01MCA1MCBMNTAgNzggTTc4IDUwIEw3OCA3OCBNNTAgNjQgTDc4IDY0Ii8+CiAgPC9nPgo8L3N2Zz4K
+    mediatype: image/svg+xml
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - secrets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - events.k8s.io
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+        - apiGroups:
+          - harbor.oreonit.com
+          resources:
+          - harborconnections
+          - harborgarbagecollections
+          - harborimmutablerules
+          - harborlabels
+          - harborprojectmembers
+          - harborprojects
+          - harborregistries
+          - harborreplicationpolicies
+          - harborretentionpolicies
+          - harborrobotaccounts
+          - harborwebhooks
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - harbor.oreonit.com
+          resources:
+          - harborconnections/finalizers
+          - harborgarbagecollections/finalizers
+          - harborimmutablerules/finalizers
+          - harborlabels/finalizers
+          - harborprojectmembers/finalizers
+          - harborprojects/finalizers
+          - harborregistries/finalizers
+          - harborreplicationpolicies/finalizers
+          - harborretentionpolicies/finalizers
+          - harborrobotaccounts/finalizers
+          - harborwebhooks/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - harbor.oreonit.com
+          resources:
+          - harborconnections/status
+          - harborgarbagecollections/status
+          - harborimmutablerules/status
+          - harborlabels/status
+          - harborprojectmembers/status
+          - harborprojects/status
+          - harborregistries/status
+          - harborreplicationpolicies/status
+          - harborretentionpolicies/status
+          - harborrobotaccounts/status
+          - harborwebhooks/status
+          verbs:
+          - get
+          - patch
+          - update
+        - apiGroups:
+          - authentication.k8s.io
+          resources:
+          - tokenreviews
+          verbs:
+          - create
+        - apiGroups:
+          - authorization.k8s.io
+          resources:
+          - subjectaccessreviews
+          verbs:
+          - create
+        serviceAccountName: harbor-resource-operator-controller-manager
+      deployments:
+      - label:
+          app.kubernetes.io/managed-by: kustomize
+          app.kubernetes.io/name: harbor-resource-operator
+          control-plane: controller-manager
+        name: harbor-resource-operator-controller-manager
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: harbor-resource-operator
+              control-plane: controller-manager
+          strategy: {}
+          template:
+            metadata:
+              annotations:
+                kubectl.kubernetes.io/default-container: manager
+              labels:
+                app.kubernetes.io/name: harbor-resource-operator
+                control-plane: controller-manager
+            spec:
+              containers:
+              - args:
+                - --metrics-bind-address=:8443
+                - --leader-elect
+                - --health-probe-bind-address=:8081
+                command:
+                - /manager
+                image: ghcr.io/oreondev/harbor-resource-operator:0.1.0
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
+                name: manager
+                ports:
+                - containerPort: 8081
+                  name: health
+                  protocol: TCP
+                readinessProbe:
+                  httpGet:
+                    path: /readyz
+                    port: 8081
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 128Mi
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
+                  readOnlyRootFilesystem: true
+              securityContext:
+                runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
+              serviceAccountName: harbor-resource-operator-controller-manager
+              terminationGracePeriodSeconds: 10
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
+          - leases
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+        serviceAccountName: harbor-resource-operator-controller-manager
+    strategy: deployment
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - harbor
+  - registry
+  - container registry
+  - robot account
+  - replication
+  - gitops
+  links:
+  - name: Source Code
+    url: https://github.com/oreondev/harbor-resource-operator
+  - name: Documentation
+    url: https://github.com/oreondev/harbor-resource-operator#readme
+  - name: Harbor Helm chart
+    url: https://github.com/goharbor/harbor-helm
+  maintainers:
+  - email: fahri.cap@oreonit.com
+    name: Fahri Cap
+  maturity: alpha
+  minKubeVersion: 1.34.0
+  provider:
+    name: Harbor Resource Operator project
+    url: https://github.com/oreondev/harbor-resource-operator
+  version: 0.1.0
