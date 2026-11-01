@@ -126,7 +126,7 @@ jobs:
       - name: Sign the image
         env:
           DIGEST: ${{ steps.build.outputs.digest }}
-        run: cosign sign --yes "$IMAGE@$DIGEST"
+        run: ./hack/cosign-sign.sh "$IMAGE@$DIGEST"
 
       - name: Setup Go
         if: github.ref_type == 'tag'
@@ -161,7 +161,7 @@ jobs:
         if: github.ref_type == 'tag'
         env:
           DIGEST: ${{ steps.chart.outputs.digest }}
-        run: cosign sign --yes "ghcr.io/oreondev/charts/harbor-resource-operator@$DIGEST"
+        run: ./hack/cosign-sign.sh "ghcr.io/oreondev/charts/harbor-resource-operator@$DIGEST"
 
       - name: Create the GitHub release
         if: github.ref_type == 'tag'
