@@ -40,7 +40,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborConnection is the Schema for the harborconnections API
+        description: HarborConnection points the operator at one Harbor instance and
+          the credentials to use.
         properties:
           apiVersion:
             description: |-
@@ -244,8 +245,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborGarbageCollection is the Schema for the harborgarbagecollections
-          API
+        description: HarborGarbageCollection manages Harbor's garbage collection schedule.
         properties:
           apiVersion:
             description: |-
@@ -457,8 +457,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborImmutableRule is the Schema for the harborimmutablerules
-          API
+        description: HarborImmutableRule manages a tag immutability rule in a Harbor
+          project.
         properties:
           apiVersion:
             description: |-
@@ -701,7 +701,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborLabel is the Schema for the harborlabels API
+        description: HarborLabel manages a global or project label in Harbor.
         properties:
           apiVersion:
             description: |-
@@ -934,8 +934,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborProjectMember is the Schema for the harborprojectmembers
-          API
+        description: HarborProjectMember grants a user or group a role in a Harbor
+          project.
         properties:
           apiVersion:
             description: |-
@@ -1188,7 +1188,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborProject is the Schema for the harborprojects API
+        description: 'HarborProject manages a Harbor project: visibility, storage
+          quota, scanning, CVE allowlist and proxy cache.'
         properties:
           apiVersion:
             description: |-
@@ -1451,7 +1452,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborRegistry is the Schema for the harborregistries API
+        description: HarborRegistry manages a registry endpoint that replication policies
+          and proxy cache projects use.
         properties:
           apiVersion:
             description: |-
@@ -1682,8 +1684,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborReplicationPolicy is the Schema for the harborreplicationpolicies
-          API
+        description: HarborReplicationPolicy manages a push or pull replication policy.
         properties:
           apiVersion:
             description: |-
@@ -2003,8 +2004,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborRetentionPolicy is the Schema for the harborretentionpolicies
-          API
+        description: HarborRetentionPolicy manages the tag retention policy of a Harbor
+          project.
         properties:
           apiVersion:
             description: |-
@@ -2298,8 +2299,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborRobotAccount is the Schema for the harborrobotaccounts
-          API
+        description: HarborRobotAccount manages a Harbor robot account and writes
+          its credentials to a Secret.
         properties:
           apiVersion:
             description: |-
@@ -2624,7 +2625,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborWebhook is the Schema for the harborwebhooks API
+        description: HarborWebhook manages a webhook policy in a Harbor project.
         properties:
           apiVersion:
             description: |-
@@ -3913,7 +3914,7 @@ spec:
         - --health-probe-bind-address=:8081
         command:
         - /manager
-        image: ghcr.io/oreondev/harbor-resource-operator:0.1.0
+        image: ghcr.io/oreondev/harbor-resource-operator:0.1.1
         livenessProbe:
           httpGet:
             path: /healthz

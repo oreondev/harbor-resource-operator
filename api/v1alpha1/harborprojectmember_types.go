@@ -67,6 +67,7 @@ type MemberGroup struct {
 type HarborProjectMemberSpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	ProjectReference `json:",inline"`
@@ -75,27 +76,33 @@ type HarborProjectMemberSpec struct {
 	// must have logged in to Harbor at least once.
 	// +optional
 	// +kubebuilder:validation:MinLength=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="User"
 	User *string `json:"user,omitempty"`
 
 	// group is a user group.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Group"
 	Group *MemberGroup `json:"group,omitempty"`
 
 	// role granted in the project.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Role"
 	Role ProjectRole `json:"role"`
 
 	// adoptExisting takes over an existing membership of the same user or group.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the membership is removed with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -121,6 +128,7 @@ type HarborProjectMemberStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -133,8 +141,9 @@ type HarborProjectMemberStatus struct {
 // +kubebuilder:printcolumn:name="Role",type=string,JSONPath=".spec.role"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Project Member",resources={{HarborConnection,v1alpha1,""},{HarborProject,v1alpha1,""}}
 
-// HarborProjectMember is the Schema for the harborprojectmembers API
+// HarborProjectMember grants a user or group a role in a Harbor project.
 type HarborProjectMember struct {
 	metav1.TypeMeta `json:",inline"`
 

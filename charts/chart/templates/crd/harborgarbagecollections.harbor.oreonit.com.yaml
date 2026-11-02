@@ -35,8 +35,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborGarbageCollection is the Schema for the harborgarbagecollections
-          API
+        description: HarborGarbageCollection manages Harbor's garbage collection schedule.
         properties:
           apiVersion:
             description: |-

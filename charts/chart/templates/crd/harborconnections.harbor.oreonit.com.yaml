@@ -35,7 +35,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborConnection is the Schema for the harborconnections API
+        description: HarborConnection points the operator at one Harbor instance and
+          the credentials to use.
         properties:
           apiVersion:
             description: |-

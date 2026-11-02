@@ -46,12 +46,14 @@ type ProjectReference struct {
 	// projectRef names a HarborProject in this namespace. The resource waits
 	// until that project is Ready.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Project"
 	ProjectRef *LocalObjectRef `json:"projectRef,omitempty"`
 
 	// projectName is the name of an existing Harbor project not managed by
 	// this operator.
 	// +optional
 	// +kubebuilder:validation:MinLength=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Existing Project Name"
 	ProjectName string `json:"projectName,omitempty"`
 }
 

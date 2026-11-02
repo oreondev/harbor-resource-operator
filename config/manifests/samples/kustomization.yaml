@@ -1,0 +1,14 @@
+# The samples without their Secrets: the bundle must not ship credentials, and
+# alm-examples only lists custom resources. The CSV description explains which
+# Secrets to create.
+resources:
+- ../../samples
+patches:
+- patch: |-
+    $patch: delete
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: unused
+  target:
+    kind: Secret

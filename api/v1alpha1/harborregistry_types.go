@@ -25,11 +25,13 @@ import (
 type HarborRegistrySpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	// name of the endpoint in Harbor. Defaults to metadata.name.
 	// +optional
 	// +kubebuilder:validation:MaxLength=64
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Name"
 	Name string `json:"name,omitempty"`
 
 	// type is Harbor's adapter name, for example harbor, docker-hub,
@@ -37,47 +39,57 @@ type HarborRegistrySpec struct {
 	// gitlab, jfrog-artifactory, huawei-SWR, ali-acr, tencent-tcr, volcengine-cr.
 	// +required
 	// +kubebuilder:validation:MinLength=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Type"
 	Type string `json:"type"`
 
 	// url of the remote registry.
 	// +required
 	// +kubebuilder:validation:Pattern=`^https?://.+`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="URL"
 	URL string `json:"url"`
 
 	// insecure skips TLS verification when Harbor talks to the remote registry.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Insecure"
 	Insecure bool `json:"insecure,omitempty"`
 
 	// credentialsSecretRef names a Secret in this namespace with keys
 	// "accessKey" and "accessSecret". Omit for anonymous access.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Credentials Secret"
 	CredentialsSecretRef *LocalObjectRef `json:"credentialsSecretRef,omitempty"`
 
 	// credentialType is basic or oauth.
 	// +optional
 	// +kubebuilder:default=basic
 	// +kubebuilder:validation:Enum=basic;oauth
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Credential Type"
 	CredentialType string `json:"credentialType,omitempty"`
 
 	// description shown in Harbor.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Description"
 	Description string `json:"description,omitempty"`
 
 	// createEvenIfUnhealthy creates the endpoint even when the ping fails.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Create Even If Unhealthy"
 	CreateEvenIfUnhealthy bool `json:"createEvenIfUnhealthy,omitempty"`
 
 	// adoptExisting takes over an endpoint of the same name.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the Harbor endpoint is deleted with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -105,6 +117,7 @@ type HarborRegistryStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -116,8 +129,9 @@ type HarborRegistryStatus struct {
 // +kubebuilder:printcolumn:name="Health",type=string,JSONPath=".status.health"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Registry",resources={{HarborConnection,v1alpha1,""},{Secret,v1,""}}
 
-// HarborRegistry is the Schema for the harborregistries API
+// HarborRegistry manages a registry endpoint that replication policies and proxy cache projects use.
 type HarborRegistry struct {
 	metav1.TypeMeta `json:",inline"`
 

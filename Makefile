@@ -1,7 +1,20 @@
 # Release version without the leading "v"; the release workflow sets it from the tag.
-VERSION ?= 0.1.0
+VERSION ?= 0.1.1
 # Image URL to use all building/pushing image targets
 IMG ?= ghcr.io/oreondev/harbor-resource-operator:$(VERSION)
+
+# OLM bundle (OperatorHub). CHANNELS and DEFAULT_CHANNEL go into the bundle metadata.
+CHANNELS ?= alpha
+DEFAULT_CHANNEL ?= alpha
+BUNDLE_CHANNELS := --channels=$(CHANNELS)
+BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
+BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
+BUNDLE_IMG ?= ghcr.io/oreondev/harbor-resource-operator-bundle:v$(VERSION)
+# Generate the bundle with image digests instead of tags (needed for disconnected clusters).
+USE_IMAGE_DIGESTS ?= false
+ifeq ($(USE_IMAGE_DIGESTS), true)
+	BUNDLE_GEN_FLAGS += --use-image-digests
+endif
 # YEAR defines the year value used for substituting the YEAR placeholder in the boilerplate header.
 YEAR ?= $(shell date +%Y)
 
@@ -158,6 +171,28 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	cd config/manager && "$(KUSTOMIZE)" edit set image controller=${IMG}
 	"$(KUSTOMIZE)" build config/default > dist/install.yaml
 
+##@ OLM bundle
+
+.PHONY: bundle
+bundle: manifests kustomize operator-sdk ## Generate the OLM bundle for VERSION in bundle/ and validate it.
+	"$(OPERATOR_SDK)" generate kustomize manifests -q
+	cd config/manager && "$(KUSTOMIZE)" edit set image controller=$(IMG)
+	"$(KUSTOMIZE)" build config/manifests | "$(OPERATOR_SDK)" generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS) $(BUNDLE_GEN_FLAGS)
+	sed -i 's|^    containerImage: .*|    containerImage: $(IMG)|' bundle/manifests/harbor-resource-operator.clusterserviceversion.yaml
+	"$(OPERATOR_SDK)" bundle validate ./bundle
+
+.PHONY: bundle-validate
+bundle-validate: operator-sdk ## Validate bundle/ with the checks OperatorHub runs.
+	"$(OPERATOR_SDK)" bundle validate ./bundle --select-optional suite=operatorframework
+
+.PHONY: bundle-build
+bundle-build: ## Build the bundle image.
+	$(CONTAINER_TOOL) build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+.PHONY: bundle-push
+bundle-push: ## Push the bundle image.
+	$(CONTAINER_TOOL) push $(BUNDLE_IMG)
+
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -197,6 +232,7 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
+OPERATOR_SDK ?= $(LOCALBIN)/operator-sdk
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.8.1
@@ -214,6 +250,7 @@ ENVTEST_K8S_VERSION ?= $(shell v='$(call gomodver,k8s.io/api)'; \
 
 GOLANGCI_LINT_VERSION ?= v2.13.1
 KIND_VERSION ?= v0.33.0
+OPERATOR_SDK_VERSION ?= v1.42.3
 .PHONY: kind
 kind: $(KIND) ## Download kind locally if necessary.
 $(KIND): $(LOCALBIN)
@@ -251,6 +288,20 @@ $(GOLANGCI_LINT): $(LOCALBIN)
 		$(GOLANGCI_LINT) custom --destination $(LOCALBIN) --name golangci-lint-custom && \
 		mv -f $(LOCALBIN)/golangci-lint-custom $(GOLANGCI_LINT); \
 	} || true
+
+# operator-sdk is only a build tool here (bundle generation and validation); the operator has no SDK code.
+.PHONY: operator-sdk
+operator-sdk: $(OPERATOR_SDK) ## Download operator-sdk locally if necessary.
+$(OPERATOR_SDK): $(LOCALBIN)
+	@[ -f "$(OPERATOR_SDK)-$(OPERATOR_SDK_VERSION)" ] && [ "$$(readlink -- "$(OPERATOR_SDK)" 2>/dev/null)" = "$(OPERATOR_SDK)-$(OPERATOR_SDK_VERSION)" ] || { \
+	set -e; \
+	os=$$(go env GOOS); arch=$$(go env GOARCH); \
+	echo "Downloading operator-sdk $(OPERATOR_SDK_VERSION) for $${os}/$${arch}"; \
+	curl -sSLfo "$(OPERATOR_SDK)-$(OPERATOR_SDK_VERSION)" \
+		"https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${os}_$${arch}"; \
+	chmod +x "$(OPERATOR_SDK)-$(OPERATOR_SDK_VERSION)"; \
+	}; \
+	ln -sf "$$(realpath "$(OPERATOR_SDK)-$(OPERATOR_SDK_VERSION)")" "$(OPERATOR_SDK)"
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

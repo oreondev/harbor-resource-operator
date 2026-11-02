@@ -1,0 +1,4 @@
+# Build context for bundle.Dockerfile: only the generated bundle.
+**
+!bundle
+!bundle/**

@@ -38,8 +38,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborReplicationPolicy is the Schema for the harborreplicationpolicies
-          API
+        description: HarborReplicationPolicy manages a push or pull replication policy.
         properties:
           apiVersion:
             description: |-

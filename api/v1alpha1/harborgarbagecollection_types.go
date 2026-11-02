@@ -26,6 +26,7 @@ import (
 type HarborGarbageCollectionSpec struct {
 	// connectionRef selects the Harbor instance. Needs a system administrator connection.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	// schedule is Hourly, Daily, Weekly, None, or a six-field cron expression
@@ -33,10 +34,12 @@ type HarborGarbageCollectionSpec struct {
 	// +required
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:Pattern=`^(Hourly|Daily|Weekly|None|\S+( \S+){5})$`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Schedule"
 	Schedule string `json:"schedule"`
 
 	// deleteUntagged also deletes untagged artifacts.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Delete Untagged"
 	DeleteUntagged bool `json:"deleteUntagged,omitempty"`
 
 	// workers run garbage collection in parallel, 1 to 5.
@@ -44,16 +47,19 @@ type HarborGarbageCollectionSpec struct {
 	// +kubebuilder:default=1
 	// +kubebuilder:validation:Minimum=1
 	// +kubebuilder:validation:Maximum=5
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Workers"
 	Workers int32 `json:"workers,omitempty"`
 
 	// deletionPolicy Retain (default) leaves the schedule in Harbor when this
 	// object is deleted; Delete sets the schedule to None.
 	// +optional
 	// +kubebuilder:default=Retain
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -93,6 +99,7 @@ type HarborGarbageCollectionStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -103,8 +110,9 @@ type HarborGarbageCollectionStatus struct {
 // +kubebuilder:printcolumn:name="Last run",type=string,JSONPath=".status.lastRun.status"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Garbage Collection",resources={{HarborConnection,v1alpha1,""}}
 
-// HarborGarbageCollection is the Schema for the harborgarbagecollections API
+// HarborGarbageCollection manages Harbor's garbage collection schedule.
 type HarborGarbageCollection struct {
 	metav1.TypeMeta `json:",inline"`
 
