@@ -52,7 +52,7 @@ On a `vX.Y.Z` tag the release workflow checks that the committed `bundle/` is fo
 | `installModes` | `AllNamespaces` only | the operator's default. `OwnNamespace`/`SingleNamespace`/`MultiNamespace` would need `--watch-namespaces` fed from the OperatorGroup annotation `olm.targetNamespaces`, plus a test. |
 | `minKubeVersion` | `1.34.0` | the oldest version the end-to-end suite runs on |
 | `maturity`, channel | `alpha`, default channel `alpha` | add a `stable` channel when the API reaches `v1beta1` or `v1` |
-| `provider` | Harbor Resource Operator project, the GitHub URL | no company behind the project |
+| `provider` | Oreon IT, https://www.oreonit.com | the company that maintains the project; shown as "Provided by" on the listing |
 | `maintainers` | Fahri Cap, fahri.cap@oreonit.com | |
 | `links`, `support` | GitHub repository, README, issues, the Harbor Helm chart | there is no separate docs site yet; switch `Documentation` when there is |
 | arch labels | amd64, arm64, ppc64le, s390x, linux | the release image is built for these |
@@ -64,7 +64,7 @@ Descriptors and resources come from `// +operator-sdk:csv:customresourcedefiniti
 
 1. **Make the bundle image public.** After the first release that pushes it, set `harbor-resource-operator-bundle` on ghcr.io to public, like the operator image and the chart. The catalog CI pulls the manager image anonymously; the bundle image is only for our own tests and `operator-sdk run bundle`.
 2. **Install test with OLM on kind.** Install OLM (`operator-sdk olm install`), build and push a bundle image somewhere the cluster can pull from, then `operator-sdk run bundle <bundle image> --namespace operators`. Check that the CSV reaches `Succeeded`, the manager Deployment is available, and a `HarborConnection` to a real Harbor becomes `Ready`. Then run `operator-sdk scorecard <bundle image>`; the basic and OLM suites must all pass. Clean up with `operator-sdk cleanup harbor-resource-operator`. This catches RBAC that works with kustomize but is missing from the CSV.
-3. **Version.** v0.1.0 was released before the bundle existed, so it has no bundle image or archive. The first submission is 0.1.1, the first release that publishes the bundle.
+3. **Version.** v0.1.0 was released before the bundle existed, so it has no bundle image or archive. The first submission is 0.1.2, the first release with the final provider listing (0.1.1 had a placeholder provider).
 
 ## 5. Submitting a release to OperatorHub.io
 
@@ -118,7 +118,7 @@ Same bundle directory, pull request rules and `reviewers`, with two differences:
 | Bundle image in the release workflow, signed | done, runs from the next tag |
 | Spec and status descriptors, CSV resources | done |
 | OLM install test and scorecard on kind | passed: CSV Succeeded, connection and project Ready, scorecard 6/6 |
-| First OperatorHub.io pull request | to do with 0.1.1 (section 5) |
+| First OperatorHub.io pull request | to do with 0.1.2 (section 5) |
 | Upgrade test | from the second listed release |
 | Console descriptors | optional |
 | OpenShift | after a test on OpenShift |
