@@ -38,8 +38,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborImmutableRule is the Schema for the harborimmutablerules
-          API
+        description: HarborImmutableRule manages a tag immutability rule in a Harbor
+          project.
         properties:
           apiVersion:
             description: |-

@@ -32,7 +32,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborWebhook is the Schema for the harborwebhooks API
+        description: HarborWebhook manages a webhook policy in a Harbor project.
         properties:
           apiVersion:
             description: |-

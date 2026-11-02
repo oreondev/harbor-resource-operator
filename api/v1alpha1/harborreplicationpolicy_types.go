@@ -68,31 +68,38 @@ type ReplicationTrigger struct {
 type HarborReplicationPolicySpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	// name of the policy in Harbor. Defaults to metadata.name.
 	// +optional
 	// +kubebuilder:validation:MaxLength=256
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Name"
 	Name string `json:"name,omitempty"`
 
 	// description shown in Harbor.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Description"
 	Description string `json:"description,omitempty"`
 
 	// direction is push (local to destRegistryRef) or pull (srcRegistryRef to local).
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Direction"
 	Direction ReplicationDirection `json:"direction"`
 
 	// destRegistryRef names the HarborRegistry to push to. Required for push.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Destination Registry"
 	DestRegistryRef *LocalObjectRef `json:"destRegistryRef,omitempty"`
 
 	// srcRegistryRef names the HarborRegistry to pull from. Required for pull.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Source Registry"
 	SrcRegistryRef *LocalObjectRef `json:"srcRegistryRef,omitempty"`
 
 	// destNamespace is the target project or namespace. Empty keeps the source path.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Destination Namespace"
 	DestNamespace string `json:"destNamespace,omitempty"`
 
 	// destNamespaceReplaceCount is how many leading path components destNamespace
@@ -100,58 +107,71 @@ type HarborReplicationPolicySpec struct {
 	// +optional
 	// +kubebuilder:default=-1
 	// +kubebuilder:validation:Minimum=-1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Destination Path Components Replaced"
 	DestNamespaceReplaceCount *int32 `json:"destNamespaceReplaceCount,omitempty"`
 
 	// filters are managed in full.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Filters"
 	Filters []ReplicationFilter `json:"filters,omitempty"`
 
 	// trigger says when the policy runs.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Trigger"
 	Trigger ReplicationTrigger `json:"trigger,omitempty"`
 
 	// override replaces artifacts that already exist at the destination.
 	// +optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Override"
 	Override *bool `json:"override,omitempty"`
 
 	// enabled enables the policy.
 	// +optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Enabled"
 	Enabled *bool `json:"enabled,omitempty"`
 
 	// replicateDeletion propagates deletions.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Replicate Deletion"
 	ReplicateDeletion bool `json:"replicateDeletion,omitempty"`
 
 	// copyByChunk transfers blobs in chunks.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Copy By Chunk"
 	CopyByChunk bool `json:"copyByChunk,omitempty"`
 
 	// singleActiveReplication skips a run while the previous one is still active.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Single Active Replication"
 	SingleActiveReplication bool `json:"singleActiveReplication,omitempty"`
 
 	// speedKBps limits bandwidth. 0 means unlimited.
 	// +optional
 	// +kubebuilder:validation:Minimum=0
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Speed Limit (KB/s)"
 	SpeedKBps int32 `json:"speedKBps,omitempty"`
 
 	// executeOnCreate starts one execution right after the policy is created.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Execute On Create"
 	ExecuteOnCreate bool `json:"executeOnCreate,omitempty"`
 
 	// adoptExisting takes over a policy of the same name.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the Harbor policy is deleted with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -195,6 +215,7 @@ type HarborReplicationPolicyStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -206,8 +227,9 @@ type HarborReplicationPolicyStatus struct {
 // +kubebuilder:printcolumn:name="Last run",type=string,JSONPath=".status.lastExecution.status"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Replication Policy",resources={{HarborConnection,v1alpha1,""},{HarborRegistry,v1alpha1,""}}
 
-// HarborReplicationPolicy is the Schema for the harborreplicationpolicies API
+// HarborReplicationPolicy manages a push or pull replication policy.
 type HarborReplicationPolicy struct {
 	metav1.TypeMeta `json:",inline"`
 

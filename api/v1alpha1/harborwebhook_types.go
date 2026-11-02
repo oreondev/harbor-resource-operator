@@ -76,6 +76,7 @@ type WebhookTarget struct {
 type HarborWebhookSpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	ProjectReference `json:",inline"`
@@ -83,10 +84,12 @@ type HarborWebhookSpec struct {
 	// name of the webhook policy in Harbor. Defaults to metadata.name.
 	// +optional
 	// +kubebuilder:validation:MaxLength=256
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Name"
 	Name string `json:"name,omitempty"`
 
 	// description shown in Harbor.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Description"
 	Description string `json:"description,omitempty"`
 
 	// eventTypes Harbor notifies about, for example PUSH_ARTIFACT,
@@ -95,30 +98,36 @@ type HarborWebhookSpec struct {
 	// +required
 	// +kubebuilder:validation:MinItems=1
 	// +listType=set
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Event Types"
 	EventTypes []string `json:"eventTypes"`
 
 	// targets receive the events.
 	// +required
 	// +kubebuilder:validation:MinItems=1
 	// +kubebuilder:validation:MaxItems=8
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Targets"
 	Targets []WebhookTarget `json:"targets"`
 
 	// enabled turns the webhook on or off. Defaults to true.
 	// +optional
 	// +kubebuilder:default=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Enabled"
 	Enabled *bool `json:"enabled,omitempty"`
 
 	// adoptExisting takes over a webhook policy of the same name.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the webhook is deleted with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -149,6 +158,7 @@ type HarborWebhookStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -159,8 +169,9 @@ type HarborWebhookStatus struct {
 // +kubebuilder:printcolumn:name="ID",type=integer,JSONPath=".status.webhookID"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Webhook",resources={{HarborConnection,v1alpha1,""},{HarborProject,v1alpha1,""},{Secret,v1,""}}
 
-// HarborWebhook is the Schema for the harborwebhooks API
+// HarborWebhook manages a webhook policy in a Harbor project.
 type HarborWebhook struct {
 	metav1.TypeMeta `json:",inline"`
 

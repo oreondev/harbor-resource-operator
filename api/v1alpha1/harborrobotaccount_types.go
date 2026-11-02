@@ -100,69 +100,83 @@ type RotationSpec struct {
 type HarborRobotAccountSpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	// name of the robot without Harbor's prefix. Defaults to metadata.name.
 	// Harbor stores it as robot$<name> (system) or robot$<project>+<name> (project).
 	// +optional
 	// +kubebuilder:validation:Pattern=`^[a-z0-9]+(?:[._-][a-z0-9]+)*$`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Name"
 	Name string `json:"name,omitempty"`
 
 	// level is project or system.
 	// +optional
 	// +kubebuilder:default=project
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Level"
 	Level RobotLevel `json:"level,omitempty"`
 
 	// projectRef names a HarborProject in this namespace. Required for project
 	// level robots unless projectName is set.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Project"
 	ProjectRef *LocalObjectRef `json:"projectRef,omitempty"`
 
 	// projectName is the Harbor project name for project level robots when the
 	// project is not managed by this operator.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Existing Project Name"
 	ProjectName string `json:"projectName,omitempty"`
 
 	// description shown in Harbor.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Description"
 	Description string `json:"description,omitempty"`
 
 	// duration in days before the robot expires. -1 means never.
 	// +optional
 	// +kubebuilder:default=-1
 	// +kubebuilder:validation:Minimum=-1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Duration"
 	Duration int64 `json:"duration,omitempty"`
 
 	// permissions granted to the robot. For project level robots a single
 	// entry without namespace is usual.
 	// +required
 	// +kubebuilder:validation:MinItems=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Permissions"
 	Permissions []RobotPermission `json:"permissions"`
 
 	// secret describes the Kubernetes Secret that receives the credentials.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Credentials Secret"
 	Secret RobotSecretSpec `json:"secret,omitempty"`
 
 	// rotation controls automatic secret refresh.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Rotation"
 	Rotation *RotationSpec `json:"rotation,omitempty"`
 
 	// disabled disables the robot in Harbor without deleting it.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Disabled"
 	Disabled bool `json:"disabled,omitempty"`
 
 	// adoptExisting takes over a robot of the same name. Because Harbor never
 	// reveals an existing secret, adoption refreshes the secret.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the Harbor robot is deleted with this object.
 	// +optional
 	// +kubebuilder:default=Delete
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -196,6 +210,7 @@ type HarborRobotAccountStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -207,8 +222,9 @@ type HarborRobotAccountStatus struct {
 // +kubebuilder:printcolumn:name="Expires",type=string,JSONPath=".status.expiresAt"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Robot Account",resources={{HarborConnection,v1alpha1,""},{HarborProject,v1alpha1,""},{Secret,v1,""}}
 
-// HarborRobotAccount is the Schema for the harborrobotaccounts API
+// HarborRobotAccount manages a Harbor robot account and writes its credentials to a Secret.
 type HarborRobotAccount struct {
 	metav1.TypeMeta `json:",inline"`
 

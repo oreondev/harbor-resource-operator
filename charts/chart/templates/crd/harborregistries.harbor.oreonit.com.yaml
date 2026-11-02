@@ -38,7 +38,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborRegistry is the Schema for the harborregistries API
+        description: HarborRegistry manages a registry endpoint that replication policies
+          and proxy cache projects use.
         properties:
           apiVersion:
             description: |-

@@ -35,8 +35,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborRetentionPolicy is the Schema for the harborretentionpolicies
-          API
+        description: HarborRetentionPolicy manages the tag retention policy of a Harbor
+          project.
         properties:
           apiVersion:
             description: |-

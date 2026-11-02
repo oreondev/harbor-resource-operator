@@ -27,21 +27,25 @@ type HarborConnectionSpec struct {
 	// The API path /api/v2.0 is appended by the operator.
 	// +required
 	// +kubebuilder:validation:Pattern=`^https?://.+`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="URL"
 	URL string `json:"url"`
 
 	// credentialsSecretRef names a Secret in this namespace with keys
 	// "username" and "password". Use a system robot account with the
 	// permissions the operator needs rather than the admin user.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Credentials Secret"
 	CredentialsSecretRef LocalObjectRef `json:"credentialsSecretRef"`
 
 	// caBundleSecretRef names a Secret in this namespace with key "ca.crt"
 	// holding PEM certificates to trust for the Harbor URL.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="CA Bundle Secret"
 	CABundleSecretRef *LocalObjectRef `json:"caBundleSecretRef,omitempty"`
 
 	// insecureSkipTLSVerify disables TLS certificate verification. Not for production.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Skip TLS Verification"
 	InsecureSkipTLSVerify bool `json:"insecureSkipTLSVerify,omitempty"`
 
 	// allowedNamespaces lists namespaces whose resources may reference this
@@ -49,18 +53,21 @@ type HarborConnectionSpec struct {
 	// is always allowed.
 	// +optional
 	// +listType=set
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Allowed Namespaces"
 	AllowedNamespaces []string `json:"allowedNamespaces,omitempty"`
 
 	// syncPeriod is the default interval at which resources using this
 	// connection are re-read from Harbor and drift is corrected.
 	// +optional
 	// +kubebuilder:default="10m"
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 
 	// requestsPerSecond caps the request rate the operator sends to this Harbor.
 	// +optional
 	// +kubebuilder:default=10
 	// +kubebuilder:validation:Minimum=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Requests Per Second"
 	RequestsPerSecond int32 `json:"requestsPerSecond,omitempty"`
 }
 
@@ -86,6 +93,7 @@ type HarborConnectionStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -96,8 +104,9 @@ type HarborConnectionStatus struct {
 // +kubebuilder:printcolumn:name="Version",type=string,JSONPath=".status.harborVersion"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Connection",resources={{Secret,v1,""}}
 
-// HarborConnection is the Schema for the harborconnections API
+// HarborConnection points the operator at one Harbor instance and the credentials to use.
 type HarborConnection struct {
 	metav1.TypeMeta `json:",inline"`
 

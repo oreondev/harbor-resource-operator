@@ -38,8 +38,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborProjectMember is the Schema for the harborprojectmembers
-          API
+        description: HarborProjectMember grants a user or group a role in a Harbor
+          project.
         properties:
           apiVersion:
             description: |-

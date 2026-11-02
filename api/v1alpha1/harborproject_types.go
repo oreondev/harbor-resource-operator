@@ -74,38 +74,46 @@ type ProxyCacheSpec struct {
 type HarborProjectSpec struct {
 	// connectionRef selects the Harbor instance.
 	// +required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Harbor Connection"
 	ConnectionRef ConnectionRef `json:"connectionRef"`
 
 	// name of the project in Harbor. Defaults to metadata.name.
 	// +optional
 	// +kubebuilder:validation:MaxLength=255
 	// +kubebuilder:validation:Pattern=`^[a-z0-9]+(?:[._-][a-z0-9]+)*$`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Name"
 	Name string `json:"name,omitempty"`
 
 	// public makes the project readable without authentication.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Public"
 	Public *bool `json:"public,omitempty"`
 
 	// storageQuotaBytes caps the project storage. -1 means unlimited.
 	// +optional
 	// +kubebuilder:validation:Minimum=-1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Storage Quota (bytes)"
 	StorageQuotaBytes *int64 `json:"storageQuotaBytes,omitempty"`
 
 	// metadata holds scanning, content trust and allowlist settings.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Project Settings"
 	Metadata *ProjectMetadata `json:"metadata,omitempty"`
 
 	// cveAllowlist is the project level CVE allowlist. When set, it is managed in full.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="CVE Allowlist"
 	CVEAllowlist *CVEAllowlist `json:"cveAllowlist,omitempty"`
 
 	// proxyCache makes the project a proxy cache for an upstream registry.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Proxy Cache"
 	ProxyCache *ProxyCacheSpec `json:"proxyCache,omitempty"`
 
 	// adoptExisting allows taking over a project of the same name that already
 	// exists in Harbor. Without it, an existing project is reported as a conflict.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Adopt Existing"
 	AdoptExisting bool `json:"adoptExisting,omitempty"`
 
 	// deletionPolicy controls whether the Harbor project is deleted with this object.
@@ -113,10 +121,12 @@ type HarborProjectSpec struct {
 	// operator never deletes repositories.
 	// +optional
 	// +kubebuilder:default=Retain
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Deletion Policy"
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// syncPeriod overrides the connection's drift-correction interval.
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Sync Period"
 	SyncPeriod *metav1.Duration `json:"syncPeriod,omitempty"`
 }
 
@@ -138,6 +148,7 @@ type HarborProjectStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,displayName="Conditions",xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
@@ -148,8 +159,9 @@ type HarborProjectStatus struct {
 // +kubebuilder:printcolumn:name="ID",type=integer,JSONPath=".status.projectID"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+// +operator-sdk:csv:customresourcedefinitions:displayName="Harbor Project",resources={{HarborConnection,v1alpha1,""},{HarborRegistry,v1alpha1,""}}
 
-// HarborProject is the Schema for the harborprojects API
+// HarborProject manages a Harbor project: visibility, storage quota, scanning, CVE allowlist and proxy cache.
 type HarborProject struct {
 	metav1.TypeMeta `json:",inline"`
 

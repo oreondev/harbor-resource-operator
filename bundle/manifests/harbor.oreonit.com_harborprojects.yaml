@@ -32,7 +32,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HarborProject is the Schema for the harborprojects API
+        description: 'HarborProject manages a Harbor project: visibility, storage
+          quota, scanning, CVE allowlist and proxy cache.'
         properties:
           apiVersion:
             description: |-
