@@ -763,6 +763,8 @@ spec:
     url: https://github.com/oreondev/harbor-resource-operator#readme
   - name: Harbor Helm chart
     url: https://github.com/goharbor/harbor-helm
+  - name: Oreon IT
+    url: https://www.oreonit.com
   maintainers:
   - email: fahri.cap@oreonit.com
     name: Fahri Cap
