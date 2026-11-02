@@ -58,13 +58,13 @@ On a `vX.Y.Z` tag the release workflow checks that the committed `bundle/` is fo
 | arch labels | amd64, arm64, ppc64le, s390x, linux | the release image is built for these |
 | OpenShift feature annotations | `proxy-aware: "true"`, everything else `"false"` | the Harbor transport clones Go's default transport, so it reads `HTTPS_PROXY`/`NO_PROXY`; confirm once on a proxied cluster |
 
-Optional later: `// +operator-sdk:csv:customresourcedefinitions:displayName=...` markers on spec and status fields give the OpenShift console forms and status views instead of raw YAML. The scorecard's `olm-spec-descriptors` and `olm-status-descriptors` tests report their absence.
+Descriptors and resources come from `// +operator-sdk:csv:customresourcedefinitions:...` markers in `api/v1alpha1`: one on each kind (display name and the resources it uses) and one on each top-level spec field and on `status.conditions`. Add the marker when adding a spec field, or the scorecard's `olm-spec-descriptors` test fails. The kind marker must stay inside the `+kubebuilder` marker block; a blank line between them makes controller-gen drop the short names, printer columns and status subresource.
 
 ## 4. Before the first submission
 
 1. **Make the bundle image public.** After the first release that pushes it, set `harbor-resource-operator-bundle` on ghcr.io to public, like the operator image and the chart. The catalog CI pulls the manager image anonymously; the bundle image is only for our own tests and `operator-sdk run bundle`.
-2. **Install test with OLM on kind.** Install OLM (`operator-sdk olm install`), build and push a bundle image somewhere the cluster can pull from, then `operator-sdk run bundle <bundle image> --namespace operators`. Check that the CSV reaches `Succeeded`, the manager Deployment is available, and a `HarborConnection` to a real Harbor becomes `Ready`. Then run `operator-sdk scorecard <bundle image>` and fix what the basic and OLM suites report (the descriptor tests are expected to fail until the markers exist). Clean up with `operator-sdk cleanup harbor-resource-operator`. This catches RBAC that works with kustomize but is missing from the CSV.
-3. **Version.** v0.1.0 was released before the bundle existed, so its GitHub release has no bundle archive and no bundle image was pushed. Either submit `bundle/` from `develop` as 0.1.0 (it points at the published `0.1.0` image), or cut 0.1.1 so the release workflow publishes everything together. The second is cleaner.
+2. **Install test with OLM on kind.** Install OLM (`operator-sdk olm install`), build and push a bundle image somewhere the cluster can pull from, then `operator-sdk run bundle <bundle image> --namespace operators`. Check that the CSV reaches `Succeeded`, the manager Deployment is available, and a `HarborConnection` to a real Harbor becomes `Ready`. Then run `operator-sdk scorecard <bundle image>`; the basic and OLM suites must all pass. Clean up with `operator-sdk cleanup harbor-resource-operator`. This catches RBAC that works with kustomize but is missing from the CSV.
+3. **Version.** v0.1.0 was released before the bundle existed, so it has no bundle image or archive. The first submission is 0.1.1, the first release that publishes the bundle.
 
 ## 5. Submitting a release to OperatorHub.io
 
@@ -116,8 +116,9 @@ Same bundle directory, pull request rules and `reviewers`, with two differences:
 | Bundle tooling, CSV base, samples without Secrets, icon, scorecard config | done |
 | `make bundle-validate` with the operatorframework suite | passes (one false-positive warning, section 2) |
 | Bundle image in the release workflow, signed | done, runs from the next tag |
-| OLM install test and scorecard on kind | to do (section 4) |
-| First OperatorHub.io pull request | to do (section 5) |
+| Spec and status descriptors, CSV resources | done |
+| OLM install test and scorecard on kind | passed: CSV Succeeded, connection and project Ready, scorecard 6/6 |
+| First OperatorHub.io pull request | to do with 0.1.1 (section 5) |
 | Upgrade test | from the second listed release |
 | Console descriptors | optional |
 | OpenShift | after a test on OpenShift |

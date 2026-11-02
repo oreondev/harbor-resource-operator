@@ -1,5 +1,5 @@
 # Release version without the leading "v"; the release workflow sets it from the tag.
-VERSION ?= 0.1.0
+VERSION ?= 0.1.1
 # Image URL to use all building/pushing image targets
 IMG ?= ghcr.io/oreondev/harbor-resource-operator:$(VERSION)
 
