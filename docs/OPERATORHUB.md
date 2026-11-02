@@ -52,9 +52,9 @@ On a `vX.Y.Z` tag the release workflow checks that the committed `bundle/` is fo
 | `installModes` | `AllNamespaces` only | the operator's default. `OwnNamespace`/`SingleNamespace`/`MultiNamespace` would need `--watch-namespaces` fed from the OperatorGroup annotation `olm.targetNamespaces`, plus a test. |
 | `minKubeVersion` | `1.34.0` | the oldest version the end-to-end suite runs on |
 | `maturity`, channel | `alpha`, default channel `alpha` | add a `stable` channel when the API reaches `v1beta1` or `v1` |
-| `provider` | Oreon IT, https://www.oreonit.com | the company that maintains the project; shown as "Provided by" on the listing |
+| `provider` | Oreon IT, https://www.oreonit.com | the company that maintains the project. The listing shows the name as plain text and does not link `provider.url`, so the site is also in `links` |
 | `maintainers` | Fahri Cap, fahri.cap@oreonit.com | |
-| `links`, `support` | GitHub repository, README, issues, the Harbor Helm chart | there is no separate docs site yet; switch `Documentation` when there is |
+| `links`, `support` | GitHub repository, README, issues, the Harbor Helm chart, Oreon IT | there is no separate docs site yet; switch `Documentation` when there is |
 | arch labels | amd64, arm64, ppc64le, s390x, linux | the release image is built for these |
 | OpenShift feature annotations | `proxy-aware: "true"`, everything else `"false"` | the Harbor transport clones Go's default transport, so it reads `HTTPS_PROXY`/`NO_PROXY`; confirm once on a proxied cluster |
 
@@ -118,7 +118,7 @@ Same bundle directory, pull request rules and `reviewers`, with two differences:
 | Bundle image in the release workflow, signed | done, runs from the next tag |
 | Spec and status descriptors, CSV resources | done |
 | OLM install test and scorecard on kind | passed: CSV Succeeded, connection and project Ready, scorecard 6/6 |
-| First OperatorHub.io pull request | to do with 0.1.2 (section 5) |
+| First OperatorHub.io pull request | 0.1.2 opened as k8s-operatorhub/community-operators#9812 |
 | Upgrade test | from the second listed release |
 | Console descriptors | optional |
 | OpenShift | after a test on OpenShift |
