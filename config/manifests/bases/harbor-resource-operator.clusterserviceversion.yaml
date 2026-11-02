@@ -769,6 +769,6 @@ spec:
   maturity: alpha
   minKubeVersion: 1.34.0
   provider:
-    name: Harbor Resource Operator project
-    url: https://github.com/oreondev/harbor-resource-operator
+    name: Oreon IT
+    url: https://www.oreonit.com
   version: 0.0.0
