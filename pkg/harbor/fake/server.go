@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 // Server is a fake Harbor.

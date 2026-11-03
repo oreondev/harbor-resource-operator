@@ -113,7 +113,7 @@ make test-e2e    # kind cluster + real Harbor chart (HARBOR_CHART_VERSION=1.19.4
 
 Branches, pull requests and releases are described in [CONTRIBUTING.md](CONTRIBUTING.md). To run your own build: `make docker-build docker-push IMG=<your image>`, then `make deploy IMG=<your image>`.
 
-Tests use `internal/harbor/fake`, an in-memory Harbor API v2.0 that mimics the endpoints, status codes, `Location` headers and error bodies the operator depends on. End-to-end tests install the official Harbor chart on kind and run against Harbor 2.15 on every push, and against 2.12 to 2.15 nightly.
+Tests use `pkg/harbor/fake`, an in-memory Harbor API v2.0 that mimics the endpoints, status codes, `Location` headers and error bodies the operator depends on. End-to-end tests install the official Harbor chart on kind and run against Harbor 2.15 on every push, and against 2.12 to 2.15 nightly.
 
 ## Status
 

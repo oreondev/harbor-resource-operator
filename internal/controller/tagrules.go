@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	harborv1alpha1 "github.com/oreondev/harbor-resource-operator/api/v1alpha1"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 // Immutable tag rules and retention rules share Harbor's rule shape. These
