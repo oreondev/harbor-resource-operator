@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // Package fake is an in-memory Harbor API v2.0 server for tests. It covers
-// exactly the endpoints the operator uses and mimics Harbor's status codes,
+// exactly the endpoints the operator and the Harbor MCP server use and mimics Harbor's status codes,
 // Location headers and error bodies.
 package fake
 
@@ -67,6 +67,13 @@ type Server struct {
 	KeepRetentionPointer bool
 	GCRuns               []harbor.GCHistory
 
+	// Browse state; see browse.go.
+	Repositories map[int64]*harbor.Repository
+	Artifacts    map[int64]*artifact
+	// NoScanner mimics a Harbor without a scanner (no Trivy): reports of
+	// existing artifacts answer 404 "no scanner registration configured".
+	NoScanner bool
+
 	// Requests records "METHOD path" of every call, for assertions.
 	Requests []string
 
@@ -94,6 +101,8 @@ func New(username, password string) *Server {
 		ImmutableRules: map[int64]*ImmutableRule{},
 		Webhooks:       map[int64]*harbor.WebhookPolicy{},
 		Retentions:     map[int64]*harbor.RetentionPolicy{},
+		Repositories:   map[int64]*harbor.Repository{},
+		Artifacts:      map[int64]*artifact{},
 	}
 	s.Users[username] = 1
 	mux := http.NewServeMux()
@@ -127,6 +136,7 @@ func New(username, password string) *Server {
 	mux.HandleFunc("POST "+p+"/replication/executions", s.startExecution)
 	mux.HandleFunc("GET "+p+"/replication/executions", s.listExecutions)
 	s.registerCompliance(mux, p)
+	s.registerBrowse(mux, p)
 	s.srv = httptest.NewServer(s.auth(mux))
 	return s
 }
@@ -159,6 +169,9 @@ func (s *Server) Reset() {
 	s.GC = nil
 	s.KeepRetentionPointer = false
 	s.GCRuns = nil
+	s.Repositories = map[int64]*harbor.Repository{}
+	s.Artifacts = map[int64]*artifact{}
+	s.NoScanner = false
 	s.Requests = nil
 }
 

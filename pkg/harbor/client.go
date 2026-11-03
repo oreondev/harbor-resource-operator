@@ -39,6 +39,8 @@ const (
 	userAgent   = "harbor-resource-operator"
 	qPage       = "page"
 	qPageSize   = "page_size"
+	qSort       = "sort"
+	vTrue       = "true"
 )
 
 // Options configure a Client.
@@ -248,7 +250,7 @@ func (c *Client) CurrentUser(ctx context.Context) (*User, error) {
 
 // ---- projects ----
 
-var byName = map[string]string{"X-Is-Resource-Name": "true"}
+var byName = map[string]string{"X-Is-Resource-Name": vTrue}
 
 // GetProjectByName returns the project or a 404 APIError.
 func (c *Client) GetProjectByName(ctx context.Context, name string) (*Project, error) {
@@ -505,7 +507,7 @@ func (c *Client) LatestReplicationExecution(ctx context.Context, policyID int64)
 		"policy_id": {strconv.FormatInt(policyID, 10)},
 		qPageSize:   {"1"},
 		qPage:       {"1"},
-		"sort":      {"-start_time"},
+		qSort:       {"-start_time"},
 	}
 	var out []ReplicationExecution
 	if _, err := c.do(ctx, http.MethodGet, "/replication/executions", q, nil, &out, nil); err != nil {
