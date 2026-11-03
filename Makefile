@@ -1,5 +1,5 @@
 # Release version without the leading "v"; the release workflow sets it from the tag.
-VERSION ?= 0.1.3
+VERSION ?= 0.1.4
 # Image URL to use all building/pushing image targets
 IMG ?= ghcr.io/oreondev/harbor-resource-operator:$(VERSION)
 
@@ -83,10 +83,12 @@ test: manifests generate fmt vet setup-envtest ## Run tests.
 #   1.16.x = Harbor 2.12, 1.17.x = 2.13, 1.18.x = 2.14, 1.19.x = 2.15.
 # kubectl kuberc is disabled by default for test isolation; enable with KUBECTL_KUBERC=true.
 # Set E2E_SKIP_CLEANUP=true to keep the cluster for debugging.
+# KIND_NODE_IMAGE selects the Kubernetes version (default: kind's own node image).
 KIND_CLUSTER ?= harbor-resource-operator-test-e2e
 HARBOR_CHART_VERSION ?= 1.19.4
 HARBOR_NAMESPACE ?= harbor
 E2E_SKIP_CLEANUP ?= false
+KIND_NODE_IMAGE ?=
 
 .PHONY: setup-test-e2e
 setup-test-e2e: kind ## Set up a Kind cluster for e2e tests if it does not exist
@@ -95,7 +97,7 @@ setup-test-e2e: kind ## Set up a Kind cluster for e2e tests if it does not exist
 			echo "Kind cluster '$(KIND_CLUSTER)' already exists. Skipping creation." ;; \
 		*) \
 			echo "Creating Kind cluster '$(KIND_CLUSTER)'..."; \
-			$(KIND) create cluster --name $(KIND_CLUSTER) ;; \
+			$(KIND) create cluster --name $(KIND_CLUSTER) $(if $(KIND_NODE_IMAGE),--image $(KIND_NODE_IMAGE)) ;; \
 	esac
 
 .PHONY: setup-harbor-e2e

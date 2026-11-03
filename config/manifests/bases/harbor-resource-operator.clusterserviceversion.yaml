@@ -727,7 +727,7 @@ spec:
     and `ci-webhook-auth` (webhook `Authorization` header, key `authorization`).
     Credentials are never logged or written to status or events.
 
-    Supported: Harbor 2.12 to 2.15, Kubernetes 1.34 and later. The operator
+    Supported: Harbor 2.12 to 2.15, Kubernetes 1.30 and later. The operator
     watches all namespaces.
 
     This is an independent community project. It is not affiliated with or
@@ -769,7 +769,7 @@ spec:
   - email: fahri.cap@oreonit.com
     name: Fahri Cap
   maturity: alpha
-  minKubeVersion: 1.34.0
+  minKubeVersion: 1.30.0
   provider:
     name: Oreon IT
     url: https://www.oreonit.com
