@@ -536,7 +536,7 @@ func (s *Server) deleteWebhook(w http.ResponseWriter, r *http.Request) {
 // ---- retention ----
 
 func validRetention(p harbor.RetentionPolicy) bool {
-	if p.Algorithm != "or" || p.Scope == nil || p.Scope.Level != "project" || p.Trigger == nil || p.Trigger.Kind != "Schedule" {
+	if p.Algorithm != "or" || p.Scope == nil || p.Scope.Level != levelProject || p.Trigger == nil || p.Trigger.Kind != "Schedule" {
 		return false
 	}
 	for _, rule := range p.Rules {
