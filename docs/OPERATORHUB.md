@@ -50,7 +50,7 @@ On a `vX.Y.Z` tag the release workflow checks that the committed `bundle/` is fo
 | `capabilities` | `Seamless Upgrades` (level 2) | REQUIREMENTS D2. The CRDs are `v1alpha1` with additive changes only, which OLM upgrades cleanly. Level 3 ("Full Lifecycle", backup and restore) does not fit an operator that does not run Harbor. Level 4 becomes possible once a `PrometheusRule` and a dashboard ship in the bundle. An upgrade test (section 6) should back the level-2 claim from the second release on. |
 | `categories` | `Integration & Delivery, Developer Tools` | from the catalog's `categories.json` |
 | `installModes` | `AllNamespaces` only | the operator's default. `OwnNamespace`/`SingleNamespace`/`MultiNamespace` would need `--watch-namespaces` fed from the OperatorGroup annotation `olm.targetNamespaces`, plus a test. |
-| `minKubeVersion` | `1.34.0` | the oldest version the end-to-end suite runs on |
+| `minKubeVersion` | `1.30.0` | the oldest version the end-to-end suite runs on (nightly on a `kindest/node:v1.30` cluster). It was 1.34.0 up to 0.1.3, which failed the OperatorHub.io `kiwi` test: that job runs kind with Kubernetes 1.30, so OLM never created the Deployment. Lower it only together with the nightly job |
 | `maturity`, channel | `alpha`, default channel `alpha` | add a `stable` channel when the API reaches `v1beta1` or `v1` |
 | `provider` | Oreon IT, https://www.oreonit.com | the company that maintains the project. The listing shows the name as plain text and does not link `provider.url`, so the site is also in `links` |
 | `maintainers` | Fahri Cap, fahri.cap@oreonit.com | |
@@ -118,7 +118,7 @@ Same bundle directory, pull request rules and `reviewers`, with two differences:
 | Bundle image in the release workflow, signed | done, runs from the next tag |
 | Spec and status descriptors, CSV resources | done |
 | OLM install test and scorecard on kind | passed: CSV Succeeded, connection and project Ready, scorecard 6/6 |
-| First OperatorHub.io pull request | 0.1.2 opened as k8s-operatorhub/community-operators#9812 |
-| Upgrade test | from the second listed release |
+| OperatorHub.io listing | 0.1.2 listed (k8s-operatorhub/community-operators#9812); updates from 0.1.3 on |
+| Upgrade test | passed 0.1.2 to 0.1.3 on kind with OLM 0.28: CSV Succeeded, Harbor IDs and the robot Secret unchanged |
 | Console descriptors | optional |
 | OpenShift | after a test on OpenShift |

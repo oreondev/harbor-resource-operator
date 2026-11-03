@@ -1,8 +1,9 @@
 name: E2E Tests
 
 # Pushes and pull requests run against the newest supported Harbor.
-# The nightly run and manual runs cover every supported Harbor minor; the
-# nightly run tests develop, where changes land before a release.
+# The nightly run and manual runs cover every supported Harbor minor, and the
+# newest Harbor on the oldest supported Kubernetes (minKubeVersion in the CSV);
+# the nightly run tests develop, where changes land before a release.
 on:
   push:
     branches: [main, develop]
@@ -21,13 +22,13 @@ jobs:
   test-e2e:
     permissions:
       contents: read
-    name: Harbor ${{ matrix.harbor.app }}
+    name: Harbor ${{ matrix.harbor.app }}${{ matrix.harbor.k8s && format(' on Kubernetes {0}', matrix.harbor.k8s) || '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        harbor: ${{ fromJSON((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '[{"chart":"1.16.4","app":"2.12"},{"chart":"1.17.5","app":"2.13"},{"chart":"1.18.4","app":"2.14"},{"chart":"1.19.4","app":"2.15"}]' || '[{"chart":"1.19.4","app":"2.15"}]') }}
+        harbor: ${{ fromJSON((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '[{"chart":"1.16.4","app":"2.12"},{"chart":"1.17.5","app":"2.13"},{"chart":"1.18.4","app":"2.14"},{"chart":"1.19.4","app":"2.15"},{"chart":"1.19.4","app":"2.15","k8s":"1.30","node":"kindest/node:v1.30.13@sha256:397209b3d947d154f6641f2d0ce8d473732bd91c87d9575ade99049aa33cd648"}]' || '[{"chart":"1.19.4","app":"2.15"}]') }}
     steps:
       - name: Clone the code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,4 +45,5 @@ jobs:
         env:
           HARBOR_CHART_VERSION: ${{ matrix.harbor.chart }}
           HARBOR_VERSION: ${{ matrix.harbor.app }}
-        run: make test-e2e HARBOR_CHART_VERSION="$HARBOR_CHART_VERSION"
+          KIND_NODE_IMAGE: ${{ matrix.harbor.node }}
+        run: make test-e2e HARBOR_CHART_VERSION="$HARBOR_CHART_VERSION" KIND_NODE_IMAGE="$KIND_NODE_IMAGE"

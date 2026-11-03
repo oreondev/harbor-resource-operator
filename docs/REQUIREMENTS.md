@@ -287,7 +287,7 @@ All project-scoped kinds take exactly one of `projectRef` (a HarborProject in th
 ## 11. Compatibility
 
 - V1. Harbor 2.12, 2.13, 2.14 and 2.15 tested end to end (2.15 on every push, all four nightly); API v2.0 only. New Harbor minors are added to the matrix within one month of release.
-- V2. Kubernetes: end-to-end tested on 1.34 and 1.37, envtest on 1.37. OpenShift: not yet tested; the pod meets the restricted Pod Security Standard (non-root, read-only filesystem, no capabilities, no fixed UID), which the `restricted-v2` SCC requires.
+- V2. Kubernetes 1.30 and later: end-to-end tested on 1.30 (nightly, the minimum), 1.34 and 1.37, envtest on 1.37. OpenShift: not yet tested; the pod meets the restricted Pod Security Standard (non-root, read-only filesystem, no capabilities, no fixed UID), which the `restricted-v2` SCC requires.
 - V3. CRD schema changes within v1alpha1 are additive only; a v1beta1 with a conversion webhook is a milestone after M3 and only if the API has to change.
 
 ## 12. Non-functional
