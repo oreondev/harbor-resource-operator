@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 // ImmutableRule is an immutable tag rule with the project it belongs to.

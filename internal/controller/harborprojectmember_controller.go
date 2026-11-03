@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 
 	harborv1alpha1 "github.com/oreondev/harbor-resource-operator/api/v1alpha1"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 // HarborProjectMemberReconciler reconciles a HarborProjectMember object

@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor/fake"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor/fake"
 )
 
 func newClient(t *testing.T, srv *fake.Server, user, pass string) *harbor.Client {
