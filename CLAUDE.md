@@ -44,6 +44,8 @@ The client and the fake server follow these; keep them in sync.
 - An unknown user on a member POST returns 404.
 - Webhook policy GET returns `auth_header`.
 - Pushing a manifest identical to one deleted earlier fails with `MANIFEST_UNKNOWN` on 2.15, so e2e images are unique per push.
+- Listing the artifacts of a missing repository (or project) returns 200 and an empty list, not 404.
+- The vulnerability report of an artifact in a project without a scanner returns 404 `no scanner registration configured for project: <id>`; a missing tag returns 404 `artifact <project>/<repo>:<tag> not found`.
 
 ## Branches and releases
 
