@@ -1,0 +1,1601 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Manage Harbor projects, robot accounts, replication and more as Kubernetes resources.">
+      
+      
+        <meta name="author" content="Oreon IT">
+      
+      
+        <link rel="canonical" href="https://www.oreonit.com/harbor-operator/latest/OPERATORHUB/">
+      
+      
+        <link rel="prev" href="../REQUIREMENTS/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../images/oreon-favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>OperatorHub packaging - Harbor Resource Operator</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/oreon.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#publishing-on-operatorhub" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Harbor Resource Operator" class="md-header__button md-logo" aria-label="Harbor Resource Operator" data-md-component="logo">
+      
+  <img src="../images/oreon-icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Harbor Resource Operator
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OperatorHub packaging
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/oreondev/harbor-resource-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    oreondev/harbor-resource-operator
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Harbor Resource Operator" class="md-nav__button md-logo" aria-label="Harbor Resource Operator" data-md-component="logo">
+      
+  <img src="../images/oreon-icon.svg" alt="logo">
+
+    </a>
+    Harbor Resource Operator
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/oreondev/harbor-resource-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    oreondev/harbor-resource-operator
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../behaviour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it behaves
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborconnection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborConnection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborproject/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborProject
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborrobotaccount/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborRobotAccount
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborregistry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborRegistry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborreplicationpolicy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborReplicationPolicy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborprojectmember/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborProjectMember
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborlabel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborLabel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborimmutablerule/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborImmutableRule
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborwebhook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborWebhook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborretentionpolicy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborRetentionPolicy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/harborgarbagecollection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HarborGarbageCollection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../REQUIREMENTS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OperatorHub packaging
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OperatorHub packaging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-where-the-operator-gets-listed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Where the operator gets listed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-how-the-bundle-is-built" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. How the bundle is built
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. How the bundle is built">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-csv-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. CSV choices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-before-the-first-submission" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Before the first submission
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-submitting-a-release-to-operatorhubio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Submitting a release to OperatorHub.io
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-upgrade-test-from-the-second-release-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Upgrade test (from the second release on)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-submitting-to-openshift-community-operators-prod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Submitting to OpenShift (community-operators-prod)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/oreondev/harbor-resource-operator/releases" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/oreondev/harbor-resource-operator/blob/main/CONTRIBUTING.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/oreondev/harbor-resource-operator/blob/main/SECURITY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-where-the-operator-gets-listed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Where the operator gets listed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-how-the-bundle-is-built" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. How the bundle is built
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. How the bundle is built">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-csv-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. CSV choices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-before-the-first-submission" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Before the first submission
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-submitting-a-release-to-operatorhubio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Submitting a release to OperatorHub.io
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-upgrade-test-from-the-second-release-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Upgrade test (from the second release on)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-submitting-to-openshift-community-operators-prod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Submitting to OpenShift (community-operators-prod)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="publishing-on-operatorhub">Publishing on OperatorHub<a class="headerlink" href="#publishing-on-operatorhub" title="Permanent link">&para;</a></h1>
+<p>How the operator is packaged for Operator Lifecycle Manager (OLM) and listed on OperatorHub. This is milestone 3 item D2 (see <code>REQUIREMENTS.md</code> section 14). The catalog rules below were checked against the community-operators and operator-pipelines docs on 2026-11-01; check them again before each first-of-its-kind submission, because both repositories change their process from time to time.</p>
+<h2 id="1-where-the-operator-gets-listed">1. Where the operator gets listed<a class="headerlink" href="#1-where-the-operator-gets-listed" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Catalog</th>
+<th>Repository</th>
+<th>Seen in</th>
+<th>Tested by their CI on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OperatorHub.io (upstream Kubernetes)</td>
+<td><a href="https://github.com/k8s-operatorhub/community-operators"><code>k8s-operatorhub/community-operators</code></a></td>
+<td>operatorhub.io, the <code>quay.io/operatorhubio/catalog</code> index, Artifact Hub</td>
+<td>kind/minikube</td>
+</tr>
+<tr>
+<td>OpenShift and OKD embedded OperatorHub</td>
+<td><a href="https://github.com/redhat-openshift-ecosystem/community-operators-prod"><code>redhat-openshift-ecosystem/community-operators-prod</code></a></td>
+<td>the OpenShift console, <code>registry.redhat.io/redhat/community-operator-index:v4.x</code></td>
+<td>an OpenShift 4 cluster</td>
+</tr>
+</tbody>
+</table>
+<p>The two catalogs are separate, with one pull request to each for every release. A listing on OperatorHub.io does not show up on OpenShift. The certified and Red Hat Marketplace catalogs are a different programme and out of scope.</p>
+<p>Order: OperatorHub.io first (its CI matches what we test on), then OpenShift once a release has run on a real OpenShift cluster.</p>
+<h2 id="2-how-the-bundle-is-built">2. How the bundle is built<a class="headerlink" href="#2-how-the-bundle-is-built" title="Permanent link">&para;</a></h2>
+<p><code>operator-sdk</code> is used as a build tool only; the operator has no SDK code. <code>make operator-sdk</code> downloads the pinned release into <code>bin/</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config/manifests/bases/harbor-resource-operator.clusterserviceversion.yaml</code></td>
+<td>CSV base: tile text, description, icon, keywords, links, maintainers, install modes, <code>minKubeVersion</code>, capability level. Written by hand; <code>operator-sdk generate kustomize manifests</code> keeps it and only refreshes the owned CRD list.</td>
+</tr>
+<tr>
+<td><code>config/manifests/kustomization.yaml</code></td>
+<td>Input for <code>make bundle</code>: <code>config/default</code>, the samples and the scorecard config.</td>
+</tr>
+<tr>
+<td><code>config/manifests/samples/</code></td>
+<td><code>config/samples</code> with the Secrets removed. The bundle must not ship credentials, and <code>alm-examples</code> only lists custom resources. The CSV description names the Secrets users create.</td>
+</tr>
+<tr>
+<td><code>config/scorecard/</code></td>
+<td>Scorecard tests (basic and OLM suites).</td>
+</tr>
+<tr>
+<td><code>docs/images/icon.svg</code></td>
+<td>The project's own icon, embedded in the CSV. It is not the Harbor logo.</td>
+</tr>
+<tr>
+<td><code>bundle/</code>, <code>bundle.Dockerfile</code></td>
+<td>Generated by <code>make bundle</code>; committed for each release, and copied as-is into the catalog repositories.</td>
+</tr>
+</tbody>
+</table>
+<p>Targets:</p>
+<div class="highlight"><pre><span></span><code>make bundle            # regenerate bundle/ for VERSION (channel alpha) and run the basic validation
+make bundle-validate   # the checks OperatorHub runs (suite=operatorframework)
+make bundle-build      # bundle image BUNDLE_IMG (default ghcr.io/oreondev/harbor-resource-operator-bundle:vVERSION)
+make bundle-push
+</code></pre></div>
+<p><code>USE_IMAGE_DIGESTS=true make bundle</code> pins the manager image by digest and fills <code>spec.relatedImages</code>, which disconnected OpenShift clusters need. It is off for now, so the CSV says <code>features.operators.openshift.io/disconnected: "false"</code>.</p>
+<p>On a <code>vX.Y.Z</code> tag the release workflow checks that the committed <code>bundle/</code> is for <code>X.Y.Z</code>, runs <code>make bundle-validate</code>, pushes and signs the bundle image, and attaches <code>harbor-resource-operator-bundle-X.Y.Z.tgz</code> to the GitHub release.</p>
+<h3 id="validation-result">Validation result<a class="headerlink" href="#validation-result" title="Permanent link">&para;</a></h3>
+<p><code>make bundle-validate</code> passes. It prints one warning, which is a false positive: the <code>events.k8s.io</code> <code>events</code> rule in the CSV is reported as "deprecated and removed in v1.25". What was removed in 1.25 is <code>events.k8s.io/v1beta1</code>; the operator uses <code>events.k8s.io/v1</code>, but RBAC rules carry no API version, so the validator flags the group. Removing the rule would break event recording.</p>
+<h2 id="3-csv-choices">3. CSV choices<a class="headerlink" href="#3-csv-choices" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>capabilities</code></td>
+<td><code>Seamless Upgrades</code> (level 2)</td>
+<td>REQUIREMENTS D2. The CRDs are <code>v1alpha1</code> with additive changes only, which OLM upgrades cleanly. Level 3 ("Full Lifecycle", backup and restore) does not fit an operator that does not run Harbor. Level 4 becomes possible once a <code>PrometheusRule</code> and a dashboard ship in the bundle. An upgrade test (section 6) should back the level-2 claim from the second release on.</td>
+</tr>
+<tr>
+<td><code>categories</code></td>
+<td><code>Integration &amp; Delivery, Developer Tools</code></td>
+<td>from the catalog's <code>categories.json</code></td>
+</tr>
+<tr>
+<td><code>installModes</code></td>
+<td><code>AllNamespaces</code> only</td>
+<td>the operator's default. <code>OwnNamespace</code>/<code>SingleNamespace</code>/<code>MultiNamespace</code> would need <code>--watch-namespaces</code> fed from the OperatorGroup annotation <code>olm.targetNamespaces</code>, plus a test.</td>
+</tr>
+<tr>
+<td><code>minKubeVersion</code></td>
+<td><code>1.30.0</code></td>
+<td>the oldest version the end-to-end suite runs on (nightly on a <code>kindest/node:v1.30</code> cluster). It was 1.34.0 up to 0.1.3, which failed the OperatorHub.io <code>kiwi</code> test: that job runs kind with Kubernetes 1.30, so OLM never created the Deployment. Lower it only together with the nightly job</td>
+</tr>
+<tr>
+<td><code>maturity</code>, channel</td>
+<td><code>alpha</code>, default channel <code>alpha</code></td>
+<td>add a <code>stable</code> channel when the API reaches <code>v1beta1</code> or <code>v1</code></td>
+</tr>
+<tr>
+<td><code>provider</code></td>
+<td>Oreon IT, https://www.oreonit.com</td>
+<td>the company that maintains the project. The listing shows the name as plain text and does not link <code>provider.url</code>, so the site is also in <code>links</code></td>
+</tr>
+<tr>
+<td><code>maintainers</code></td>
+<td>Fahri Cap, fahri.cap@oreonit.com</td>
+<td></td>
+</tr>
+<tr>
+<td><code>links</code>, <code>support</code></td>
+<td>GitHub repository, README, issues, the Harbor Helm chart, Oreon IT</td>
+<td>there is no separate docs site yet; switch <code>Documentation</code> when there is</td>
+</tr>
+<tr>
+<td>arch labels</td>
+<td>amd64, arm64, ppc64le, s390x, linux</td>
+<td>the release image is built for these</td>
+</tr>
+<tr>
+<td>OpenShift feature annotations</td>
+<td><code>proxy-aware: "true"</code>, everything else <code>"false"</code></td>
+<td>the Harbor transport clones Go's default transport, so it reads <code>HTTPS_PROXY</code>/<code>NO_PROXY</code>; confirm once on a proxied cluster</td>
+</tr>
+</tbody>
+</table>
+<p>Descriptors and resources come from <code>// +operator-sdk:csv:customresourcedefinitions:...</code> markers in <code>api/v1alpha1</code>: one on each kind (display name and the resources it uses) and one on each top-level spec field and on <code>status.conditions</code>. Add the marker when adding a spec field, or the scorecard's <code>olm-spec-descriptors</code> test fails. The kind marker must stay inside the <code>+kubebuilder</code> marker block; a blank line between them makes controller-gen drop the short names, printer columns and status subresource.</p>
+<h2 id="4-before-the-first-submission">4. Before the first submission<a class="headerlink" href="#4-before-the-first-submission" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Make the bundle image public.</strong> After the first release that pushes it, set <code>harbor-resource-operator-bundle</code> on ghcr.io to public, like the operator image and the chart. The catalog CI pulls the manager image anonymously; the bundle image is only for our own tests and <code>operator-sdk run bundle</code>.</li>
+<li><strong>Install test with OLM on kind.</strong> Install OLM (<code>operator-sdk olm install</code>), build and push a bundle image somewhere the cluster can pull from, then <code>operator-sdk run bundle &lt;bundle image&gt; --namespace operators</code>. Check that the CSV reaches <code>Succeeded</code>, the manager Deployment is available, and a <code>HarborConnection</code> to a real Harbor becomes <code>Ready</code>. Then run <code>operator-sdk scorecard &lt;bundle image&gt;</code>; the basic and OLM suites must all pass. Clean up with <code>operator-sdk cleanup harbor-resource-operator</code>. This catches RBAC that works with kustomize but is missing from the CSV.</li>
+<li><strong>Version.</strong> v0.1.0 was released before the bundle existed, so it has no bundle image or archive. The first submission is 0.1.2, the first release with the final provider listing (0.1.1 had a placeholder provider).</li>
+</ol>
+<h2 id="5-submitting-a-release-to-operatorhubio">5. Submitting a release to OperatorHub.io<a class="headerlink" href="#5-submitting-a-release-to-operatorhubio" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Fork <code>k8s-operatorhub/community-operators</code> and branch from its <code>main</code>.</li>
+<li>Copy the release's bundle into the fork:
+   <div class="highlight"><pre><span></span><code>mkdir -p operators/harbor-resource-operator/X.Y.Z
+cp -r bundle/manifests bundle/metadata operators/harbor-resource-operator/X.Y.Z/
+</code></pre></div>
+   (or unpack <code>harbor-resource-operator-bundle-X.Y.Z.tgz</code> from the GitHub release). The <code>tests/scorecard</code> directory is optional; leave it out.</li>
+<li>The first time only, add <code>operators/harbor-resource-operator/ci.yaml</code>:
+   <div class="highlight"><pre><span></span><code><span class="nt">reviewers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fahricap</span>
+<span class="nt">updateGraph</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">semver-mode</span>
+</code></pre></div>
+   With <code>semver-mode</code> the CSV needs no <code>spec.replaces</code>; OLM orders versions by semver.</li>
+<li>Commit with a DCO sign-off whose name and e-mail match the author (<code>git commit -s</code>), one operator version per pull request, and open the pull request against <code>main</code>.</li>
+<li>Their CI validates the bundle, installs it on Kubernetes and checks that the Deployment becomes healthy. Results are in the pull request's Checks tab; <code>/retest</code> reruns them. With the author listed in <code>reviewers</code>, a green run merges the pull request automatically. The listing appears on operatorhub.io after their release pipeline runs.</li>
+<li>Published versions are never edited; fixes go out as a new version.</li>
+</ol>
+<h2 id="6-upgrade-test-from-the-second-release-on">6. Upgrade test (from the second release on)<a class="headerlink" href="#6-upgrade-test-from-the-second-release-on" title="Permanent link">&para;</a></h2>
+<p><code>operator-sdk run bundle</code> the previous bundle image, create objects and wait for <code>Ready</code>, then <code>operator-sdk run bundle-upgrade</code> to the new one, and check that the objects stay <code>Ready</code> with their Harbor IDs kept. Add this to CI before claiming level 2 for a release that changes the CRDs.</p>
+<h2 id="7-submitting-to-openshift-community-operators-prod">7. Submitting to OpenShift (community-operators-prod)<a class="headerlink" href="#7-submitting-to-openshift-community-operators-prod" title="Permanent link">&para;</a></h2>
+<p>Same bundle directory, pull request rules and <code>reviewers</code>, with two differences:</p>
+<ul>
+<li><strong>Tested on OpenShift.</strong> Their CI deploys the bundle on an OpenShift 4 cluster. Run it once on OpenShift Local (CRC) or OKD first: check that the pod is admitted under <code>restricted-v2</code> (it sets no fixed UID), that the metrics Service works with OpenShift monitoring, and that the operator reaches a Harbor route with a cluster-signed CA.</li>
+<li><strong>File-based catalog (FBC).</strong> New operators are expected to use FBC. <code>ci.yaml</code> gets:
+  <div class="highlight"><pre><span></span><code><span class="nt">reviewers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fahricap</span>
+<span class="nt">fbc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">catalog_mapping</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">semver.yaml</span>
+<span class="w">      </span><span class="nt">catalogs_names</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"v4.16"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"v4.17"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"v4.18"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"v4.19"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"v4.20"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">olm.semver</span>
+</code></pre></div>
+  Next to it go <code>catalog-templates/semver.yaml</code> and their FBC <code>Makefile</code> (<code>make catalogs</code> renders <code>catalogs/v4.x/harbor-resource-operator/catalog.yaml</code> with <code>opm</code>). Each release is two pull requests: the bundle, then the catalog update with the bundle pullspec their pipeline comments. Their auto-release option opens the second one automatically. Check the OpenShift versions currently served before writing <code>catalogs_names</code>, and add <code>com.redhat.openshift.versions</code> (for example <code>"v4.16"</code>) to <code>bundle/metadata/annotations.yaml</code> in that copy.</li>
+</ul>
+<h2 id="8-status">8. Status<a class="headerlink" href="#8-status" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Release workflow, public image and chart</td>
+<td>done (v0.1.0)</td>
+</tr>
+<tr>
+<td>Bundle tooling, CSV base, samples without Secrets, icon, scorecard config</td>
+<td>done</td>
+</tr>
+<tr>
+<td><code>make bundle-validate</code> with the operatorframework suite</td>
+<td>passes (one false-positive warning, section 2)</td>
+</tr>
+<tr>
+<td>Bundle image in the release workflow, signed</td>
+<td>done, runs from the next tag</td>
+</tr>
+<tr>
+<td>Spec and status descriptors, CSV resources</td>
+<td>done</td>
+</tr>
+<tr>
+<td>OLM install test and scorecard on kind</td>
+<td>passed: CSV Succeeded, connection and project Ready, scorecard 6/6</td>
+</tr>
+<tr>
+<td>OperatorHub.io listing</td>
+<td>0.1.2 (k8s-operatorhub/community-operators#9812), 0.1.4 (#9838) and 0.1.5 (#9856) listed; 0.1.3 was never submitted, which <code>semver-mode</code> allows</td>
+</tr>
+<tr>
+<td>Upgrade test</td>
+<td>passed 0.1.2 to 0.1.3, 0.1.2 to 0.1.4, and 0.1.4 to 0.1.5 (every kind), on kind with OLM 0.28: CSV Succeeded, Harbor IDs and robot Secrets unchanged</td>
+</tr>
+<tr>
+<td>Console descriptors</td>
+<td>optional</td>
+</tr>
+<tr>
+<td>OpenShift</td>
+<td>after a test on OpenShift</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../REQUIREMENTS/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Design">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Design
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Fahri Cap. Maintained by <a href="https://www.oreonit.com">Oreon IT</a>. Apache-2.0; the Oreon IT logo is a trademark of Oreon IT and not covered by the licence. Harbor is a trademark of The Linux Foundation; this project is not affiliated with the Harbor project or the CNCF.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/oreondev/harbor-resource-operator" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.tabs.link", "navigation.footer", "navigation.sections", "navigation.top", "search.suggest"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
