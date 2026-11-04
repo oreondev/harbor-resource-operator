@@ -1,0 +1,97 @@
+site_name: Harbor Resource Operator
+site_description: Manage Harbor projects, robot accounts, replication and more as Kubernetes resources.
+site_url: https://www.oreonit.com/harbor-operator/
+site_author: Oreon IT
+repo_url: https://github.com/oreondev/harbor-resource-operator
+repo_name: oreondev/harbor-resource-operator
+edit_uri: edit/develop/docs/
+copyright: >-
+  Copyright 2026 Fahri Cap. Maintained by <a href="https://www.oreonit.com">Oreon IT</a>.
+  Apache-2.0; the Oreon IT logo is a trademark of Oreon IT and not covered by the licence.
+  Harbor is a trademark of The Linux Foundation; this project is not affiliated with the Harbor project or the CNCF.
+
+docs_dir: docs
+exclude_docs: |
+  requirements.txt
+
+hooks:
+  - hack/docs/hooks.py
+
+theme:
+  name: material
+  logo: images/oreon-icon.svg
+  favicon: images/oreon-favicon.svg
+  font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle: { icon: material/brightness-7, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle: { icon: material/brightness-4, name: Light mode }
+  features:
+    - content.code.copy
+    - content.tabs.link
+    - navigation.footer
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+
+plugins:
+  - search
+  - mike:
+      alias_type: copy
+      canonical_version: latest
+      version_selector: true
+
+extra_css:
+  - stylesheets/oreon.css
+
+extra:
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/oreondev/harbor-resource-operator
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Quick start: quickstart.md
+  - How it behaves: behaviour.md
+  - Metrics: metrics.md
+  - Reference:
+      - HarborConnection: reference/harborconnection.md
+      - HarborProject: reference/harborproject.md
+      - HarborRobotAccount: reference/harborrobotaccount.md
+      - HarborRegistry: reference/harborregistry.md
+      - HarborReplicationPolicy: reference/harborreplicationpolicy.md
+      - HarborProjectMember: reference/harborprojectmember.md
+      - HarborLabel: reference/harborlabel.md
+      - HarborImmutableRule: reference/harborimmutablerule.md
+      - HarborWebhook: reference/harborwebhook.md
+      - HarborRetentionPolicy: reference/harborretentionpolicy.md
+      - HarborGarbageCollection: reference/harborgarbagecollection.md
+  - Project:
+      - Design: REQUIREMENTS.md
+      - OperatorHub packaging: OPERATORHUB.md
+      - Releases: https://github.com/oreondev/harbor-resource-operator/releases
+      - Contributing: https://github.com/oreondev/harbor-resource-operator/blob/main/CONTRIBUTING.md
+      - Security: https://github.com/oreondev/harbor-resource-operator/blob/main/SECURITY.md

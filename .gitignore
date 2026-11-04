@@ -34,3 +34,7 @@ CLAUDE.local.md
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Docs site (generated)
+/site/
+/docs/reference/
