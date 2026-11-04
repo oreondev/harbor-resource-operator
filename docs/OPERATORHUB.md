@@ -118,7 +118,7 @@ Same bundle directory, pull request rules and `reviewers`, with two differences:
 | Bundle image in the release workflow, signed | done, runs from the next tag |
 | Spec and status descriptors, CSV resources | done |
 | OLM install test and scorecard on kind | passed: CSV Succeeded, connection and project Ready, scorecard 6/6 |
-| OperatorHub.io listing | 0.1.2 listed (k8s-operatorhub/community-operators#9812); updates from 0.1.3 on |
-| Upgrade test | passed 0.1.2 to 0.1.3 on kind with OLM 0.28: CSV Succeeded, Harbor IDs and the robot Secret unchanged |
+| OperatorHub.io listing | 0.1.2 (k8s-operatorhub/community-operators#9812) and 0.1.4 (#9838) listed; 0.1.3 was never submitted, which `semver-mode` allows |
+| Upgrade test | passed 0.1.2 to 0.1.3, and 0.1.2 to 0.1.4, on kind with OLM 0.28: CSV Succeeded, Harbor IDs and the robot Secret unchanged |
 | Console descriptors | optional |
 | OpenShift | after a test on OpenShift |
