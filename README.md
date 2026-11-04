@@ -4,6 +4,8 @@ A Kubernetes operator that manages configuration **inside** a running [Harbor](h
 
 It does **not** install or upgrade Harbor. Use the [Harbor Helm chart](https://github.com/goharbor/harbor-helm) for that. This operator talks to Harbor's REST API v2.0 only and has no dependency on other operators. See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) for the full design.
 
+Documentation: **https://www.oreonit.com/harbor-operator/**
+
 This is an independent community project. It is not affiliated with or endorsed by the Harbor project or the CNCF; Harbor is a trademark of The Linux Foundation.
 
 ## Supported versions
@@ -117,7 +119,7 @@ Tests use `pkg/harbor/fake`, an in-memory Harbor API v2.0 that mimics the endpoi
 
 ## Status
 
-`v1alpha1`: all eleven kinds are implemented and tested. The API may still change between minor versions; changes inside `v1alpha1` are additive where possible. Planned next: OperatorHub and Artifact Hub listings, a docs site, and GitOps examples for Argo CD and Flux.
+`v1alpha1`: all eleven kinds are implemented and tested. The API may still change between minor versions; changes inside `v1alpha1` are additive where possible. Listed on [OperatorHub.io](https://operatorhub.io/operator/harbor-resource-operator). Planned next: an Artifact Hub listing for the chart, and GitOps examples for Argo CD and Flux.
 
 ## Security
 
