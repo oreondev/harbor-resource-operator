@@ -533,11 +533,32 @@ func (s *Server) updateQuota(w http.ResponseWriter, r *http.Request) {
 
 // ---- robots ----
 
+// levelProject is the level of project robots and project retention scopes.
+const levelProject = "project"
+
 func (s *Server) listRobots(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	q := r.URL.Query().Get("q")
-	fuzzy, _ := strings.CutPrefix(q, "name=~")
+	// Like Harbor: project robots only with Level=project and ProjectID,
+	// otherwise system robots only.
+	q := map[string]string{}
+	for kv := range strings.SplitSeq(r.URL.Query().Get("q"), ",") {
+		if k, v, ok := strings.Cut(kv, "="); ok {
+			q[k] = v
+		}
+	}
+	projectLevel, project := q["Level"] == levelProject, ""
+	if projectLevel {
+		pid, err := strconv.ParseInt(q["ProjectID"], 10, 64)
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "Project ID must be specified when querying project robots")
+			return
+		}
+		if p := s.Projects[pid]; p != nil {
+			project = p.Name
+		}
+	}
+	fuzzy, _ := strings.CutPrefix(q["name"], "~")
 	ids := make([]int64, 0, len(s.Robots))
 	for id := range s.Robots {
 		ids = append(ids, id)
@@ -546,7 +567,11 @@ func (s *Server) listRobots(w http.ResponseWriter, r *http.Request) {
 	out := []harbor.Robot{}
 	for _, id := range ids {
 		rb := s.Robots[id]
-		if fuzzy == "" || strings.Contains(rb.Name, fuzzy) {
+		inScope := rb.Level != levelProject
+		if projectLevel {
+			inScope = rb.Level == levelProject && project != "" && len(rb.Permissions) > 0 && rb.Permissions[0].Namespace == project
+		}
+		if inScope && (fuzzy == "" || strings.Contains(rb.Name, fuzzy)) {
 			out = append(out, *rb)
 		}
 	}
@@ -563,7 +588,7 @@ func (s *Server) createRobot(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	full := "robot$" + req.Name
-	if req.Level == "project" {
+	if req.Level == levelProject {
 		if len(req.Permissions) == 0 {
 			writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "project robot needs permissions")
 			return

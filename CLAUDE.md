@@ -42,6 +42,7 @@ The client and the fake server follow these; keep them in sync.
 - `GET /retentions/{id}` of a deleted policy returns 500 on every version. The operator treats a 500 with a healthy `/systeminfo` as missing.
 - `DELETE /retentions/{id}` clears the project's `retention_id` on 2.14 and later, but leaves it on 2.12 and 2.13.
 - An unknown user on a member POST returns 404.
+- `GET /robots` lists only system robots, even with a `name=~` filter; project robots need `q=Level=project,ProjectID=<id>` (`Level=project` alone returns 400).
 - Webhook policy GET returns `auth_header`.
 - Pushing a manifest identical to one deleted earlier fails with `MANIFEST_UNKNOWN` on 2.15, so e2e images are unique per push.
 - Listing the artifacts of a missing repository (or project) returns 200 and an empty list, not 404.

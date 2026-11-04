@@ -329,7 +329,8 @@ func (c *Client) UpdateQuota(ctx context.Context, quotaID int64, hard map[string
 // ---- robots ----
 
 // ListRobots returns every robot matching the Harbor query string q
-// (for example "name=~ci"), following pagination.
+// (for example "name=~ci"), following pagination. Harbor lists only system
+// robots unless q holds Level=project and ProjectID; see ListProjectRobots.
 func (c *Client) ListRobots(ctx context.Context, q string) ([]Robot, error) {
 	var all []Robot
 	for page := 1; ; page++ {
@@ -346,6 +347,16 @@ func (c *Client) ListRobots(ctx context.Context, q string) ([]Robot, error) {
 			return all, nil
 		}
 	}
+}
+
+// ListProjectRobots returns the robots of one project, optionally only those
+// whose name contains name.
+func (c *Client) ListProjectRobots(ctx context.Context, projectID int64, name string) ([]Robot, error) {
+	q := fmt.Sprintf("Level=project,ProjectID=%d", projectID)
+	if name != "" {
+		q += ",name=~" + name
+	}
+	return c.ListRobots(ctx, q)
 }
 
 // GetRobot calls GET /robots/{id}.
