@@ -1,0 +1,18 @@
+/* Oreon IT brand colours (oreon_logo_brand/BRAND-README.md). */
+:root,
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #14203a;
+  --md-primary-fg-color--light: #2a3a5c;
+  --md-primary-fg-color--dark: #0b1323;
+  --md-accent-fg-color: #f58215;
+  --md-typeset-a-color: #c4561a;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0b1323;
+  --md-primary-fg-color--light: #14203a;
+  --md-primary-fg-color--dark: #060b15;
+  --md-accent-fg-color: #fdb813;
+  --md-typeset-a-color: #f58215;
+  --md-default-bg-color: #0f1a2e;
+}

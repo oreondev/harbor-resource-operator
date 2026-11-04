@@ -7,7 +7,8 @@ repo_name: oreondev/harbor-resource-operator
 edit_uri: edit/develop/docs/
 copyright: >-
   Copyright 2026 Fahri Cap. Maintained by <a href="https://www.oreonit.com">Oreon IT</a>.
-  Apache-2.0. Harbor is a trademark of The Linux Foundation; this project is not affiliated with the Harbor project or the CNCF.
+  Apache-2.0; the Oreon IT logo is a trademark of Oreon IT and not covered by the licence.
+  Harbor is a trademark of The Linux Foundation; this project is not affiliated with the Harbor project or the CNCF.
 
 docs_dir: docs
 exclude_docs: |
@@ -18,17 +19,19 @@ hooks:
 
 theme:
   name: material
-  logo: images/icon.svg
-  favicon: images/icon.svg
+  logo: images/oreon-icon.svg
+  favicon: images/oreon-favicon.svg
   font: false
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
+      primary: custom
+      accent: custom
       toggle: { icon: material/brightness-7, name: Dark mode }
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
+      primary: custom
+      accent: custom
       toggle: { icon: material/brightness-4, name: Light mode }
   features:
     - content.code.copy
@@ -44,6 +47,9 @@ plugins:
       alias_type: copy
       canonical_version: latest
       version_selector: true
+
+extra_css:
+  - stylesheets/oreon.css
 
 extra:
   version:
