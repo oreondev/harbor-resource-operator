@@ -35,7 +35,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	harborv1alpha1 "github.com/oreondev/harbor-resource-operator/api/v1alpha1"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor/fake"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor/fake"
 	// +kubebuilder:scaffold:imports
 )
 

@@ -39,7 +39,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	harborv1alpha1 "github.com/oreondev/harbor-resource-operator/api/v1alpha1"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 // HarborRobotAccountReconciler reconciles a HarborRobotAccount object
@@ -199,7 +199,19 @@ func (r *HarborRobotAccountReconciler) locateRobot(ctx context.Context, hc *harb
 			return nil, "", classifyHarborError(err, "get robot")
 		}
 	}
-	list, err := hc.ListRobots(ctx, "name=~"+short)
+	var list []harbor.Robot
+	var err error
+	if level == harborv1alpha1.RobotLevelSystem {
+		list, err = hc.ListRobots(ctx, "name=~"+short)
+	} else {
+		// Harbor lists project robots only per project.
+		var proj *harbor.Project
+		if proj, err = hc.GetProjectByName(ctx, projectName); err == nil {
+			list, err = hc.ListProjectRobots(ctx, proj.ProjectID, short)
+		} else if harbor.IsNotFound(err) {
+			return nil, "", nil
+		}
+	}
 	if err != nil {
 		return nil, "", classifyHarborError(err, "list robots")
 	}

@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	harborv1alpha1 "github.com/oreondev/harbor-resource-operator/api/v1alpha1"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 const (
@@ -343,6 +343,48 @@ var _ = Describe("HarborRobotAccount", func() {
 		Eventually(func() bool {
 			return harborSrv.RobotByName("robot$payments+ci") == nil
 		}, timeout, interval).Should(BeTrue())
+	})
+
+	It("adopts an existing project robot only with adoptExisting", func() {
+		ns := newNamespace()
+		newConnection(ns, "conn", 2*time.Second)
+		proj := &harborv1alpha1.HarborProject{
+			ObjectMeta: metav1.ObjectMeta{Name: "billing", Namespace: ns},
+			Spec:       harborv1alpha1.HarborProjectSpec{ConnectionRef: harborv1alpha1.ConnectionRef{Name: "conn"}},
+		}
+		Expect(k8sClient.Create(ctx, proj)).To(Succeed())
+		Eventually(func() bool { return harborSrv.ProjectByName("billing") != nil }, timeout, interval).Should(BeTrue())
+		existing := harborSrv.AddRobot(harbor.Robot{Name: "robot$billing+deploy", Level: "project", Duration: new(int64(-1)), ExpiresAt: -1,
+			Permissions: []harbor.RobotPermission{{Kind: "project", Namespace: "billing",
+				Access: []harbor.Access{{Resource: "repository", Action: "pull", Effect: "allow"}}}}}, "old-secret")
+
+		robot := &harborv1alpha1.HarborRobotAccount{
+			ObjectMeta: metav1.ObjectMeta{Name: "billing-deploy", Namespace: ns},
+			Spec: harborv1alpha1.HarborRobotAccountSpec{
+				ConnectionRef: harborv1alpha1.ConnectionRef{Name: "conn"},
+				Name:          "deploy",
+				ProjectRef:    &harborv1alpha1.LocalObjectRef{Name: "billing"},
+				Permissions: []harborv1alpha1.RobotPermission{{Access: []harborv1alpha1.RobotAccess{
+					{Resource: "repository", Action: "pull"}}}},
+			},
+		}
+		Expect(k8sClient.Create(ctx, robot)).To(Succeed())
+		Eventually(func() string {
+			_ = k8sClient.Get(ctx, client.ObjectKeyFromObject(robot), robot)
+			return readyReason(robot.Status.Conditions)
+		}, timeout, interval).Should(Equal("False/" + harborv1alpha1.ReasonAlreadyExists))
+		Expect(harborSrv.SecretOf(existing)).To(Equal("old-secret"), "must not touch the robot")
+
+		robot.Spec.AdoptExisting = true
+		Expect(k8sClient.Update(ctx, robot)).To(Succeed())
+		Eventually(func() bool {
+			_ = k8sClient.Get(ctx, client.ObjectKeyFromObject(robot), robot)
+			return isReady(robot.Status.Conditions)
+		}, timeout, interval).Should(BeTrue())
+		Expect(*robot.Status.RobotID).To(Equal(existing))
+		sec := &corev1.Secret{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: robot.Status.SecretRef.Name, Namespace: ns}, sec)).To(Succeed())
+		Expect(string(sec.Data["password"])).To(And(Equal(harborSrv.SecretOf(existing)), Not(Equal("old-secret"))))
 	})
 
 	It("writes a dockerconfigjson Secret for a system robot", func() {

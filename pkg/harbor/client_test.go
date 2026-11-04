@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
-	"github.com/oreondev/harbor-resource-operator/internal/harbor/fake"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor/fake"
 )
 
 func newClient(t *testing.T, srv *fake.Server, user, pass string) *harbor.Client {
@@ -162,6 +162,39 @@ func TestRobotsLifecycleAndPagination(t *testing.T) {
 	}
 	if err := c.DeleteRobot(ctx, created.ID); err != nil {
 		t.Fatalf("delete robot: %v", err)
+	}
+}
+
+func TestRobotListingScope(t *testing.T) {
+	srv := fake.New("admin", "pw")
+	defer srv.Close()
+	ctx := context.Background()
+	c := newClient(t, srv, "admin", "pw")
+
+	pid := srv.AddProject("shop", false)
+	srv.AddProject("other", false)
+	srv.AddRobot(harbor.Robot{Name: "robot$ops", Level: "system"}, "x")
+	srv.AddRobot(harbor.Robot{Name: "robot$shop+ci", Level: "project",
+		Permissions: []harbor.RobotPermission{{Kind: "project", Namespace: "shop"}}}, "x")
+	srv.AddRobot(harbor.Robot{Name: "robot$other+ci", Level: "project",
+		Permissions: []harbor.RobotPermission{{Kind: "project", Namespace: "other"}}}, "x")
+
+	// Harbor leaves project robots out of a plain listing, even one by name.
+	if got, err := c.ListRobots(ctx, ""); err != nil || len(got) != 1 || got[0].Name != "robot$ops" {
+		t.Fatalf("list robots: %v %+v", err, got)
+	}
+	if got, err := c.ListRobots(ctx, "name=~ci"); err != nil || len(got) != 0 {
+		t.Fatalf("list robots by name: %v %+v", err, got)
+	}
+	got, err := c.ListProjectRobots(ctx, pid, "ci")
+	if err != nil || len(got) != 1 || got[0].Name != "robot$shop+ci" {
+		t.Fatalf("list project robots: %v %+v", err, got)
+	}
+	if got, err := c.ListProjectRobots(ctx, pid, "nope"); err != nil || len(got) != 0 {
+		t.Fatalf("list project robots by missing name: %v %+v", err, got)
+	}
+	if _, err := c.ListRobots(ctx, "Level=project"); !harbor.IsClientError(err) {
+		t.Fatalf("project level without project ID: %v", err)
 	}
 }
 

@@ -36,10 +36,10 @@ Every kind supports `adoptExisting` (take over an object that already exists in 
 ## Quick start
 
 ```bash
-# 1. Install the operator (replace 0.1.4 with the latest release)
-helm install harbor-resource-operator oci://ghcr.io/oreondev/charts/harbor-resource-operator --version 0.1.4 \
+# 1. Install the operator (replace 0.1.5 with the latest release)
+helm install harbor-resource-operator oci://ghcr.io/oreondev/charts/harbor-resource-operator --version 0.1.5 \
   --namespace harbor-resource-operator-system --create-namespace
-# or: kubectl apply -f https://github.com/oreondev/harbor-resource-operator/releases/download/v0.1.4/install.yaml
+# or: kubectl apply -f https://github.com/oreondev/harbor-resource-operator/releases/download/v0.1.5/install.yaml
 
 # 2. Point it at a Harbor
 kubectl create namespace harbor-system
@@ -68,7 +68,7 @@ The connection's account needs enough Harbor permissions for the kinds you use: 
 Images are signed with cosign (keyless). To verify:
 
 ```bash
-cosign verify ghcr.io/oreondev/harbor-resource-operator:0.1.4 \
+cosign verify ghcr.io/oreondev/harbor-resource-operator:0.1.5 \
   --certificate-identity-regexp '^https://github.com/oreondev/harbor-resource-operator/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
@@ -113,7 +113,7 @@ make test-e2e    # kind cluster + real Harbor chart (HARBOR_CHART_VERSION=1.19.4
 
 Branches, pull requests and releases are described in [CONTRIBUTING.md](CONTRIBUTING.md). To run your own build: `make docker-build docker-push IMG=<your image>`, then `make deploy IMG=<your image>`.
 
-Tests use `internal/harbor/fake`, an in-memory Harbor API v2.0 that mimics the endpoints, status codes, `Location` headers and error bodies the operator depends on. End-to-end tests install the official Harbor chart on kind and run against Harbor 2.15 on every push, and against 2.12 to 2.15 nightly.
+Tests use `pkg/harbor/fake`, an in-memory Harbor API v2.0 that mimics the endpoints, status codes, `Location` headers and error bodies the operator depends on. End-to-end tests install the official Harbor chart on kind and run against Harbor 2.15 on every push, and against 2.12 to 2.15 nightly.
 
 ## Status
 

@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // Package fake is an in-memory Harbor API v2.0 server for tests. It covers
-// exactly the endpoints the operator uses and mimics Harbor's status codes,
+// exactly the endpoints the operator and the Harbor MCP server use and mimics Harbor's status codes,
 // Location headers and error bodies.
 package fake
 
@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oreondev/harbor-resource-operator/internal/harbor"
+	"github.com/oreondev/harbor-resource-operator/pkg/harbor"
 )
 
 // Server is a fake Harbor.
@@ -67,6 +67,13 @@ type Server struct {
 	KeepRetentionPointer bool
 	GCRuns               []harbor.GCHistory
 
+	// Browse state; see browse.go.
+	Repositories map[int64]*harbor.Repository
+	Artifacts    map[int64]*artifact
+	// NoScanner mimics a Harbor without a scanner (no Trivy): reports of
+	// existing artifacts answer 404 "no scanner registration configured".
+	NoScanner bool
+
 	// Requests records "METHOD path" of every call, for assertions.
 	Requests []string
 
@@ -94,6 +101,8 @@ func New(username, password string) *Server {
 		ImmutableRules: map[int64]*ImmutableRule{},
 		Webhooks:       map[int64]*harbor.WebhookPolicy{},
 		Retentions:     map[int64]*harbor.RetentionPolicy{},
+		Repositories:   map[int64]*harbor.Repository{},
+		Artifacts:      map[int64]*artifact{},
 	}
 	s.Users[username] = 1
 	mux := http.NewServeMux()
@@ -127,6 +136,7 @@ func New(username, password string) *Server {
 	mux.HandleFunc("POST "+p+"/replication/executions", s.startExecution)
 	mux.HandleFunc("GET "+p+"/replication/executions", s.listExecutions)
 	s.registerCompliance(mux, p)
+	s.registerBrowse(mux, p)
 	s.srv = httptest.NewServer(s.auth(mux))
 	return s
 }
@@ -159,6 +169,9 @@ func (s *Server) Reset() {
 	s.GC = nil
 	s.KeepRetentionPointer = false
 	s.GCRuns = nil
+	s.Repositories = map[int64]*harbor.Repository{}
+	s.Artifacts = map[int64]*artifact{}
+	s.NoScanner = false
 	s.Requests = nil
 }
 
@@ -520,11 +533,32 @@ func (s *Server) updateQuota(w http.ResponseWriter, r *http.Request) {
 
 // ---- robots ----
 
+// levelProject is the level of project robots and project retention scopes.
+const levelProject = "project"
+
 func (s *Server) listRobots(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	q := r.URL.Query().Get("q")
-	fuzzy, _ := strings.CutPrefix(q, "name=~")
+	// Like Harbor: project robots only with Level=project and ProjectID,
+	// otherwise system robots only.
+	q := map[string]string{}
+	for kv := range strings.SplitSeq(r.URL.Query().Get("q"), ",") {
+		if k, v, ok := strings.Cut(kv, "="); ok {
+			q[k] = v
+		}
+	}
+	projectLevel, project := q["Level"] == levelProject, ""
+	if projectLevel {
+		pid, err := strconv.ParseInt(q["ProjectID"], 10, 64)
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "Project ID must be specified when querying project robots")
+			return
+		}
+		if p := s.Projects[pid]; p != nil {
+			project = p.Name
+		}
+	}
+	fuzzy, _ := strings.CutPrefix(q["name"], "~")
 	ids := make([]int64, 0, len(s.Robots))
 	for id := range s.Robots {
 		ids = append(ids, id)
@@ -533,7 +567,11 @@ func (s *Server) listRobots(w http.ResponseWriter, r *http.Request) {
 	out := []harbor.Robot{}
 	for _, id := range ids {
 		rb := s.Robots[id]
-		if fuzzy == "" || strings.Contains(rb.Name, fuzzy) {
+		inScope := rb.Level != levelProject
+		if projectLevel {
+			inScope = rb.Level == levelProject && project != "" && len(rb.Permissions) > 0 && rb.Permissions[0].Namespace == project
+		}
+		if inScope && (fuzzy == "" || strings.Contains(rb.Name, fuzzy)) {
 			out = append(out, *rb)
 		}
 	}
@@ -550,7 +588,7 @@ func (s *Server) createRobot(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	full := "robot$" + req.Name
-	if req.Level == "project" {
+	if req.Level == levelProject {
 		if len(req.Permissions) == 0 {
 			writeErr(w, http.StatusBadRequest, "BAD_REQUEST", "project robot needs permissions")
 			return

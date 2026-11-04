@@ -436,7 +436,7 @@ func (c *Client) UpdateGCSchedule(ctx context.Context, s GCSchedule) error {
 
 // LatestGC returns the most recent garbage collection run, or nil.
 func (c *Client) LatestGC(ctx context.Context) (*GCHistory, error) {
-	q := url.Values{"sort": {"-creation_time"}, qPage: {"1"}, qPageSize: {"1"}}
+	q := url.Values{qSort: {"-creation_time"}, qPage: {"1"}, qPageSize: {"1"}}
 	var out []GCHistory
 	if _, err := c.do(ctx, http.MethodGet, "/system/gc", q, nil, &out, nil); err != nil {
 		return nil, err

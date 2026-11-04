@@ -80,6 +80,8 @@ type Project struct {
 	RegistryID   int64            `json:"registry_id"`
 	OwnerName    string           `json:"owner_name"`
 	RepoCount    int64            `json:"repo_count"`
+	CreationTime time.Time        `json:"creation_time"`
+	UpdateTime   time.Time        `json:"update_time"`
 	Metadata     *ProjectMetadata `json:"metadata"`
 	CVEAllowlist *CVEAllowlist    `json:"cve_allowlist"`
 }
@@ -238,7 +240,7 @@ type StartReplicationExecution struct {
 // BoolString converts a Go bool to Harbor's "true"/"false" metadata strings.
 func BoolString(b bool) string {
 	if b {
-		return "true"
+		return vTrue
 	}
 	return "false"
 }

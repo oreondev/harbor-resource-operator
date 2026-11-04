@@ -39,6 +39,8 @@ const (
 	userAgent   = "harbor-resource-operator"
 	qPage       = "page"
 	qPageSize   = "page_size"
+	qSort       = "sort"
+	vTrue       = "true"
 )
 
 // Options configure a Client.
@@ -248,7 +250,7 @@ func (c *Client) CurrentUser(ctx context.Context) (*User, error) {
 
 // ---- projects ----
 
-var byName = map[string]string{"X-Is-Resource-Name": "true"}
+var byName = map[string]string{"X-Is-Resource-Name": vTrue}
 
 // GetProjectByName returns the project or a 404 APIError.
 func (c *Client) GetProjectByName(ctx context.Context, name string) (*Project, error) {
@@ -327,7 +329,8 @@ func (c *Client) UpdateQuota(ctx context.Context, quotaID int64, hard map[string
 // ---- robots ----
 
 // ListRobots returns every robot matching the Harbor query string q
-// (for example "name=~ci"), following pagination.
+// (for example "name=~ci"), following pagination. Harbor lists only system
+// robots unless q holds Level=project and ProjectID; see ListProjectRobots.
 func (c *Client) ListRobots(ctx context.Context, q string) ([]Robot, error) {
 	var all []Robot
 	for page := 1; ; page++ {
@@ -344,6 +347,16 @@ func (c *Client) ListRobots(ctx context.Context, q string) ([]Robot, error) {
 			return all, nil
 		}
 	}
+}
+
+// ListProjectRobots returns the robots of one project, optionally only those
+// whose name contains name.
+func (c *Client) ListProjectRobots(ctx context.Context, projectID int64, name string) ([]Robot, error) {
+	q := fmt.Sprintf("Level=project,ProjectID=%d", projectID)
+	if name != "" {
+		q += ",name=~" + name
+	}
+	return c.ListRobots(ctx, q)
 }
 
 // GetRobot calls GET /robots/{id}.
@@ -505,7 +518,7 @@ func (c *Client) LatestReplicationExecution(ctx context.Context, policyID int64)
 		"policy_id": {strconv.FormatInt(policyID, 10)},
 		qPageSize:   {"1"},
 		qPage:       {"1"},
-		"sort":      {"-start_time"},
+		qSort:       {"-start_time"},
 	}
 	var out []ReplicationExecution
 	if _, err := c.do(ctx, http.MethodGet, "/replication/executions", q, nil, &out, nil); err != nil {

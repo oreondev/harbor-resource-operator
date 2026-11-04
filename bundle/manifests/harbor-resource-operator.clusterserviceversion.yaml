@@ -308,8 +308,8 @@ metadata:
       ]
     capabilities: Seamless Upgrades
     categories: Integration & Delivery, Developer Tools
-    containerImage: ghcr.io/oreondev/harbor-resource-operator:0.1.4
-    createdAt: "2026-11-02T23:15:53Z"
+    containerImage: ghcr.io/oreondev/harbor-resource-operator:0.1.5
+    createdAt: "2026-11-04T01:11:24Z"
     description: Manage Harbor projects, robot accounts, replication, retention and
       webhooks as Kubernetes resources. Does not install Harbor.
     features.operators.openshift.io/cnf: "false"
@@ -332,7 +332,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: harbor-resource-operator.v0.1.4
+  name: harbor-resource-operator.v0.1.5
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -1162,7 +1162,7 @@ spec:
                 - --health-probe-bind-address=:8081
                 command:
                 - /manager
-                image: ghcr.io/oreondev/harbor-resource-operator:0.1.4
+                image: ghcr.io/oreondev/harbor-resource-operator:0.1.5
                 livenessProbe:
                   httpGet:
                     path: /healthz
@@ -1267,4 +1267,4 @@ spec:
   provider:
     name: Oreon IT
     url: https://www.oreonit.com
-  version: 0.1.4
+  version: 0.1.5
