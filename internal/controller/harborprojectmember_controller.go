@@ -97,6 +97,13 @@ func (r *HarborProjectMemberReconciler) sync(ctx context.Context, obj *harborv1a
 			req.MemberGroup = &harbor.MemberGroup{GroupName: g.Name, GroupType: groupTypeIDs[g.Type], LDAPGroupDN: g.LDAPGroupDN}
 		}
 		id, err := hc.CreateProjectMember(ctx, proj.id, req)
+		if obj.Spec.User != nil && harbor.IsNotFound(err) {
+			// Harbor answers 404 for an unknown user. The next sync retries,
+			// so the member is added once the user exists (e.g. after a first
+			// OIDC or LDAP login).
+			return ctrl.Result{}, terminal(harborv1alpha1.ReasonUserNotFound,
+				"user %q does not exist in Harbor; it is added to project %q once the user exists", entityName, proj.name)
+		}
 		if err != nil {
 			return ctrl.Result{}, classifyHarborError(err, fmt.Sprintf("add %s %q to project %q", what, entityName, proj.name))
 		}
