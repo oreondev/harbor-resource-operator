@@ -6,7 +6,7 @@ repo_url: https://github.com/oreondev/harbor-resource-operator
 repo_name: oreondev/harbor-resource-operator
 edit_uri: edit/develop/docs/
 copyright: >-
-  Copyright 2026 Fahri Cap. Maintained by <a href="https://www.oreonit.com">Oreon IT</a>.
+  Copyright 2026 <a href="https://www.oreonit.com">Oreon IT</a>.
   Apache-2.0; the Oreon IT logo is a trademark of Oreon IT and not covered by the licence.
   Harbor is a trademark of The Linux Foundation; this project is not affiliated with the Harbor project or the CNCF.
 
@@ -92,6 +92,7 @@ nav:
   - Project:
       - Design: REQUIREMENTS.md
       - OperatorHub packaging: OPERATORHUB.md
-      - Releases: https://github.com/oreondev/harbor-resource-operator/releases
+      - Release notes: changelog.md
+      - GitHub releases: https://github.com/oreondev/harbor-resource-operator/releases
       - Contributing: https://github.com/oreondev/harbor-resource-operator/blob/main/CONTRIBUTING.md
       - Security: https://github.com/oreondev/harbor-resource-operator/blob/main/SECURITY.md

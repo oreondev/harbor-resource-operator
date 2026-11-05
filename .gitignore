@@ -38,3 +38,7 @@ CLAUDE.local.md
 # Docs site (generated)
 /site/
 /docs/reference/
+/docs/changelog.md
+
+# Python bytecode from the docs hooks
+__pycache__/

@@ -58,6 +58,9 @@ jobs:
           if [ "$make_version" != "$version" ]; then
             echo "::error::Makefile VERSION is $make_version, tag is $version; bump VERSION and regenerate the installer and chart first"; exit 1
           fi
+          if ! ./hack/release-notes.sh "$version" > /dev/null; then
+            echo "::error::CHANGELOG.md has no section for $version; add the release notes in the release bump"; exit 1
+          fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Setup Go
@@ -211,7 +214,9 @@ jobs:
           VERSION: ${{ needs.check.outputs.version }}
           DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          cat > notes.md <<EOF
+          ./hack/release-notes.sh "$VERSION" > notes.md
+          cat >> notes.md <<EOF
+
           Image: \`$IMAGE:$VERSION\` (\`$DIGEST\`), signed with cosign (keyless, GitHub Actions OIDC).
 
           Install with Helm:
