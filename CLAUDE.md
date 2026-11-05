@@ -53,7 +53,7 @@ The client and the fake server follow these; keep them in sync.
 
 ## Branches and releases
 
-See `CONTRIBUTING.md`. Work branches (`feat/`, `fix/`, `chore/`, `docs/`) are cut from `develop` and squash-merged into it; `develop` merges into `main` for a release, and a `vX.Y.Z` tag on `main` runs `.github/workflows/release.yml`.
+See `CONTRIBUTING.md`. Work branches (`feat/`, `fix/`, `chore/`, `docs/`) are cut from `develop` and squash-merged into it; `hack/release-bump.sh X.Y.Z` prepares the release PR into `develop`; merging `develop` into `main` with a new `VERSION` makes `.github/workflows/tag-release.yml` tag it and start `release.yml` and `docs.yml`. OperatorHub submissions stay manual (`docs/OPERATORHUB.md`).
 
 ## Commands
 
