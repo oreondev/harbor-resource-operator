@@ -1361,7 +1361,7 @@ make bundle-build      # bundle image BUNDLE_IMG (default ghcr.io/oreondev/harbo
 make bundle-push
 </code></pre></div>
 <p><code>USE_IMAGE_DIGESTS=true make bundle</code> pins the manager image by digest and fills <code>spec.relatedImages</code>, which disconnected OpenShift clusters need. It is off for now, so the CSV says <code>features.operators.openshift.io/disconnected: "false"</code>.</p>
-<p>On a <code>vX.Y.Z</code> tag the release workflow checks that the committed <code>bundle/</code> is for <code>X.Y.Z</code>, runs <code>make bundle-validate</code>, pushes and signs the bundle image, and attaches <code>harbor-resource-operator-bundle-X.Y.Z.tgz</code> to the GitHub release.</p>
+<p>On a <code>vX.Y.Z</code> tag (created by <code>tag-release.yml</code> when <code>main</code> gets a new <code>VERSION</code>) the release workflow checks that the committed <code>bundle/</code> is for <code>X.Y.Z</code>, runs <code>make bundle-validate</code>, pushes and signs the bundle image, and attaches <code>harbor-resource-operator-bundle-X.Y.Z.tgz</code> to the GitHub release.</p>
 <h3 id="validation-result">Validation result<a class="headerlink" href="#validation-result" title="Permanent link">&para;</a></h3>
 <p><code>make bundle-validate</code> passes. It prints one warning, which is a false positive: the <code>events.k8s.io</code> <code>events</code> rule in the CSV is reported as "deprecated and removed in v1.25". What was removed in 1.25 is <code>events.k8s.io/v1beta1</code>; the operator uses <code>events.k8s.io/v1</code>, but RBAC rules carry no API version, so the validator flags the group. Removing the rule would break event recording.</p>
 <h2 id="3-csv-choices">3. CSV choices<a class="headerlink" href="#3-csv-choices" title="Permanent link">&para;</a></h2>
@@ -1434,22 +1434,24 @@ make bundle-push
 <li><strong>Version.</strong> v0.1.0 was released before the bundle existed, so it has no bundle image or archive. The first submission is 0.1.2, the first release with the final provider listing (0.1.1 had a placeholder provider).</li>
 </ol>
 <h2 id="5-submitting-a-release-to-operatorhubio">5. Submitting a release to OperatorHub.io<a class="headerlink" href="#5-submitting-a-release-to-operatorhubio" title="Permanent link">&para;</a></h2>
+<p>This stays manual: a release is not on OperatorHub until someone submits it, and not every release needs to be. Submit after the GitHub release of <code>X.Y.Z</code> is green.</p>
 <ol>
-<li>Fork <code>k8s-operatorhub/community-operators</code> and branch from its <code>main</code>.</li>
-<li>Copy the release's bundle into the fork:
-   <div class="highlight"><pre><span></span><code>mkdir -p operators/harbor-resource-operator/X.Y.Z
-cp -r bundle/manifests bundle/metadata operators/harbor-resource-operator/X.Y.Z/
+<li><strong>Check the bundle.</strong> <code>minKubeVersion</code> in the CSV must be at or below the Kubernetes version of their kind test (1.30 at the time of writing, see <code>upstream/local.yml</code> in operator-test-playbooks), or the install test never starts the Deployment.</li>
+<li><strong>Upgrade test</strong> from the version currently listed, as in section 6.</li>
+<li><strong>Copy the bundle</strong> into a branch of your fork of <code>k8s-operatorhub/community-operators</code>, cut from its current <code>main</code>:
+   <div class="highlight"><pre><span></span><code>git -C community-operators fetch upstream &amp;&amp; git -C community-operators switch -c harbor-resource-operator-X.Y.Z upstream/main
+mkdir -p community-operators/operators/harbor-resource-operator/X.Y.Z
+cp -r bundle/manifests bundle/metadata community-operators/operators/harbor-resource-operator/X.Y.Z/
 </code></pre></div>
-   (or unpack <code>harbor-resource-operator-bundle-X.Y.Z.tgz</code> from the GitHub release). The <code>tests/scorecard</code> directory is optional; leave it out.</li>
-<li>The first time only, add <code>operators/harbor-resource-operator/ci.yaml</code>:
+   (or unpack <code>harbor-resource-operator-bundle-X.Y.Z.tgz</code> from the GitHub release). Leave <code>tests/scorecard</code> out. <code>ci.yaml</code> is already there:
    <div class="highlight"><pre><span></span><code><span class="nt">reviewers</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fahricap</span>
 <span class="nt">updateGraph</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">semver-mode</span>
 </code></pre></div>
-   With <code>semver-mode</code> the CSV needs no <code>spec.replaces</code>; OLM orders versions by semver.</li>
-<li>Commit with a DCO sign-off whose name and e-mail match the author (<code>git commit -s</code>), one operator version per pull request, and open the pull request against <code>main</code>.</li>
-<li>Their CI validates the bundle, installs it on Kubernetes and checks that the Deployment becomes healthy. Results are in the pull request's Checks tab; <code>/retest</code> reruns them. With the author listed in <code>reviewers</code>, a green run merges the pull request automatically. The listing appears on operatorhub.io after their release pipeline runs.</li>
-<li>Published versions are never edited; fixes go out as a new version.</li>
+   With <code>semver-mode</code> the CSV needs no <code>spec.replaces</code>; OLM orders versions by semver, and skipped versions are fine.</li>
+<li><strong>Commit</strong> with a DCO sign-off whose name and e-mail match the author (<code>git commit -s -m "operator harbor-resource-operator (X.Y.Z)"</code>), one operator version per pull request, push, and open the pull request against their <code>main</code>. In the description, say what changed against the listed version and how it was tested.</li>
+<li><strong>Their CI</strong> validates the bundle, installs it on kind and checks that the Deployment becomes healthy. Results are in the Checks tab; <code>/retest</code> reruns them. With the author in <code>reviewers</code>, a green run merges the pull request automatically; the listing updates on operatorhub.io after their release pipeline runs.</li>
+<li><strong>Record it</strong> in the status table below. Published versions are never edited; fixes go out as a new version.</li>
 </ol>
 <h2 id="6-upgrade-test-from-the-second-release-on">6. Upgrade test (from the second release on)<a class="headerlink" href="#6-upgrade-test-from-the-second-release-on" title="Permanent link">&para;</a></h2>
 <p><code>operator-sdk run bundle</code> the previous bundle image, create objects and wait for <code>Ready</code>, then <code>operator-sdk run bundle-upgrade</code> to the new one, and check that the objects stay <code>Ready</code> with their Harbor IDs kept. Add this to CI before claiming level 2 for a release that changes the CRDs.</p>
@@ -1492,7 +1494,7 @@ cp -r bundle/manifests bundle/metadata operators/harbor-resource-operator/X.Y.Z/
 </tr>
 <tr>
 <td>Bundle image in the release workflow, signed</td>
-<td>done, runs from the next tag</td>
+<td>done (from 0.1.1)</td>
 </tr>
 <tr>
 <td>Spec and status descriptors, CSV resources</td>
