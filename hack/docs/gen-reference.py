@@ -21,6 +21,7 @@ release. The output is generated at docs build time and not committed.
 """
 
 import glob
+import json
 import os
 import sys
 
@@ -76,7 +77,8 @@ def page(crd, samples):
     lines = [
         "---",
         f"title: {kind}",
-        f"description: {cell(schema.get('description', kind))} Field reference and example for the Harbor Resource Operator.",
+        # Quoted: descriptions contain ": ", which plain YAML scalars do not allow.
+        "description: " + json.dumps(f"{cell(schema.get('description', kind))} Field reference and example for the Harbor Resource Operator."),
         "---",
         "",
         f"# {kind}",
