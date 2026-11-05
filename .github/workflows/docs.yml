@@ -21,6 +21,7 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - "CHANGELOG.md"
       - "hack/docs/**"
       - "config/crd/bases/**"
       - "config/samples/**"

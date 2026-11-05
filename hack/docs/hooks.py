@@ -1,4 +1,4 @@
-# Copyright 2026 Fahri Cap.
+# Copyright 2026 Oreon IT.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""MkDocs hooks: generate the CRD reference and fill in the release version."""
+"""MkDocs hooks: generate the CRD reference and release notes, and fill in the release version."""
 
 import os
 import re
 import runpy
+import shutil
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -30,6 +31,7 @@ def release_version():
 
 def on_pre_build(config, **kwargs):
     runpy.run_path(os.path.join(ROOT, "hack", "docs", "gen-reference.py"), run_name="__main__")
+    shutil.copyfile(os.path.join(ROOT, "CHANGELOG.md"), os.path.join(ROOT, "docs", "changelog.md"))
 
 
 def on_page_markdown(markdown, page, config, files, **kwargs):
