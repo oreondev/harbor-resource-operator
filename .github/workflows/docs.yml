@@ -1,0 +1,93 @@
+# Docs site: https://www.oreonit.com/harbor-operator/ (GitHub Pages, served
+# under oreonit.com by a Cloudflare Worker).
+#
+# Pull requests build the site with --strict. Pushes to develop publish the
+# "dev" version; a vX.Y.Z tag on main publishes X.Y and moves "latest" to it
+# (tag-release.yml starts this workflow on the tag it creates).
+# Running the workflow by hand with a release version republishes X.Y and
+# "latest" from the chosen branch (docs fixes between releases).
+# Versions live on the gh-pages branch, managed by mike.
+name: Docs
+
+on:
+  push:
+    branches: [develop]
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version to publish as "latest", for example 0.1.5
+        required: true
+  pull_request:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "overrides/**"
+      - "CHANGELOG.md"
+      - "hack/docs/**"
+      - "config/crd/bases/**"
+      - "config/samples/**"
+      - "Makefile"
+      - ".github/workflows/docs.yml"
+
+permissions: {}
+
+concurrency:
+  group: docs-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: ${{ github.event_name != 'pull_request' }}
+
+      - name: Setup Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Install the docs toolchain
+        run: pip install --no-deps -r docs/requirements.txt
+
+      - name: Build
+        env:
+          NO_MKDOCS_2_WARNING: "1"
+        run: mkdocs build --strict
+
+      - name: Publish
+        if: github.event_name != 'pull_request'
+        env:
+          NO_MKDOCS_2_WARNING: "1"
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages --depth=1 || true
+          if [ -n "$INPUT_VERSION" ]; then
+            if ! echo "$INPUT_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::version must be X.Y.Z, got $INPUT_VERSION"; exit 1
+            fi
+            mike deploy --push --update-aliases --title "$INPUT_VERSION" "${INPUT_VERSION%.*}" latest
+            mike set-default --push latest
+          elif [ "$REF_TYPE" = tag ]; then
+            version="${REF_NAME#v}"
+            if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+              echo "::error::tag $REF_NAME is not on main"; exit 1
+            fi
+            mike deploy --push --update-aliases --title "$version" "${version%.*}" latest
+            mike set-default --push latest
+          else
+            mike deploy --push --title "dev (develop)" dev
+            # The first publish has no release yet: let the root point at dev.
+            if ! mike list latest >/dev/null 2>&1; then mike set-default --push dev; fi
+          fi

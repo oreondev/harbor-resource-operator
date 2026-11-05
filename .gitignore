@@ -34,3 +34,11 @@ CLAUDE.local.md
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Docs site (generated)
+/site/
+/docs/reference/
+/docs/changelog.md
+
+# Python bytecode from the docs hooks
+__pycache__/

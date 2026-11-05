@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{#- Product bar above the header, shared by the Oreon IT open-source sites. -#}
+{% block header %}
+  {% include "partials/products.html" %}
+  {{ super() }}
+{% endblock %}
+
+{#- Shown by mike's version selector on every version that is not "latest". -#}
+{% block outdated %}
+  You are reading the docs of an older or unreleased version.
+  <a href="{{ '../' ~ base_url }}"><strong>Go to the latest release.</strong></a>
+{% endblock %}

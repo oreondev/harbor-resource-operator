@@ -3,12 +3,15 @@ name: Release
 # A vX.Y.Z tag on main publishes a release: the multi-arch image (signed with
 # cosign, with SBOM and provenance), the Helm chart as an OCI artifact, and a
 # GitHub release with install.yaml and the OLM bundle (also pushed as a signed
-# bundle image for OperatorHub). Pushes to develop publish an edge image
-# tagged "develop" and "sha-<commit>" for testing; it is not a release.
+# bundle image for OperatorHub). tag-release.yml creates the tag when main gets
+# a new VERSION and starts this workflow on it by hand. Pushes to develop
+# publish an edge image tagged "develop" and "sha-<commit>" for testing; it is
+# not a release.
 on:
   push:
     branches: [develop]
     tags: ["v*.*.*"]
+  workflow_dispatch:
 
 permissions: {}
 
@@ -43,6 +46,9 @@ jobs:
           REF_TYPE: ${{ github.ref_type }}
           REF_NAME: ${{ github.ref_name }}
         run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$REF_TYPE" != tag ]; then
+            echo "::error::run this workflow on a vX.Y.Z tag, not on $REF_NAME"; exit 1
+          fi
           if [ "$REF_TYPE" != tag ]; then
             echo "version=" >> "$GITHUB_OUTPUT"
             exit 0
@@ -57,6 +63,9 @@ jobs:
           make_version=$(sed -n 's/^VERSION ?= //p' Makefile)
           if [ "$make_version" != "$version" ]; then
             echo "::error::Makefile VERSION is $make_version, tag is $version; bump VERSION and regenerate the installer and chart first"; exit 1
+          fi
+          if ! ./hack/release-notes.sh "$version" > /dev/null; then
+            echo "::error::CHANGELOG.md has no section for $version; add the release notes in the release bump"; exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
@@ -211,7 +220,9 @@ jobs:
           VERSION: ${{ needs.check.outputs.version }}
           DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          cat > notes.md <<EOF
+          ./hack/release-notes.sh "$VERSION" > notes.md
+          cat >> notes.md <<EOF
+
           Image: \`$IMAGE:$VERSION\` (\`$DIGEST\`), signed with cosign (keyless, GitHub Actions OIDC).
 
           Install with Helm:
