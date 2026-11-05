@@ -2,7 +2,8 @@
 # under oreonit.com by a Cloudflare Worker).
 #
 # Pull requests build the site with --strict. Pushes to develop publish the
-# "dev" version; a vX.Y.Z tag on main publishes X.Y and moves "latest" to it.
+# "dev" version; a vX.Y.Z tag on main publishes X.Y and moves "latest" to it
+# (tag-release.yml starts this workflow on the tag it creates).
 # Running the workflow by hand with a release version republishes X.Y and
 # "latest" from the chosen branch (docs fixes between releases).
 # Versions live on the gh-pages branch, managed by mike.

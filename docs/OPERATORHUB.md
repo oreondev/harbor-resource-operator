@@ -37,7 +37,7 @@ make bundle-push
 
 `USE_IMAGE_DIGESTS=true make bundle` pins the manager image by digest and fills `spec.relatedImages`, which disconnected OpenShift clusters need. It is off for now, so the CSV says `features.operators.openshift.io/disconnected: "false"`.
 
-On a `vX.Y.Z` tag the release workflow checks that the committed `bundle/` is for `X.Y.Z`, runs `make bundle-validate`, pushes and signs the bundle image, and attaches `harbor-resource-operator-bundle-X.Y.Z.tgz` to the GitHub release.
+On a `vX.Y.Z` tag (created by `tag-release.yml` when `main` gets a new `VERSION`) the release workflow checks that the committed `bundle/` is for `X.Y.Z`, runs `make bundle-validate`, pushes and signs the bundle image, and attaches `harbor-resource-operator-bundle-X.Y.Z.tgz` to the GitHub release.
 
 ### Validation result
 
@@ -68,23 +68,26 @@ Descriptors and resources come from `// +operator-sdk:csv:customresourcedefiniti
 
 ## 5. Submitting a release to OperatorHub.io
 
-1. Fork `k8s-operatorhub/community-operators` and branch from its `main`.
-2. Copy the release's bundle into the fork:
+This stays manual: a release is not on OperatorHub until someone submits it, and not every release needs to be. Submit after the GitHub release of `X.Y.Z` is green.
+
+1. **Check the bundle.** `minKubeVersion` in the CSV must be at or below the Kubernetes version of their kind test (1.30 at the time of writing, see `upstream/local.yml` in operator-test-playbooks), or the install test never starts the Deployment.
+2. **Upgrade test** from the version currently listed, as in section 6.
+3. **Copy the bundle** into a branch of your fork of `k8s-operatorhub/community-operators`, cut from its current `main`:
    ```
-   mkdir -p operators/harbor-resource-operator/X.Y.Z
-   cp -r bundle/manifests bundle/metadata operators/harbor-resource-operator/X.Y.Z/
+   git -C community-operators fetch upstream && git -C community-operators switch -c harbor-resource-operator-X.Y.Z upstream/main
+   mkdir -p community-operators/operators/harbor-resource-operator/X.Y.Z
+   cp -r bundle/manifests bundle/metadata community-operators/operators/harbor-resource-operator/X.Y.Z/
    ```
-   (or unpack `harbor-resource-operator-bundle-X.Y.Z.tgz` from the GitHub release). The `tests/scorecard` directory is optional; leave it out.
-3. The first time only, add `operators/harbor-resource-operator/ci.yaml`:
+   (or unpack `harbor-resource-operator-bundle-X.Y.Z.tgz` from the GitHub release). Leave `tests/scorecard` out. `ci.yaml` is already there:
    ```yaml
    reviewers:
      - fahricap
    updateGraph: semver-mode
    ```
-   With `semver-mode` the CSV needs no `spec.replaces`; OLM orders versions by semver.
-4. Commit with a DCO sign-off whose name and e-mail match the author (`git commit -s`), one operator version per pull request, and open the pull request against `main`.
-5. Their CI validates the bundle, installs it on Kubernetes and checks that the Deployment becomes healthy. Results are in the pull request's Checks tab; `/retest` reruns them. With the author listed in `reviewers`, a green run merges the pull request automatically. The listing appears on operatorhub.io after their release pipeline runs.
-6. Published versions are never edited; fixes go out as a new version.
+   With `semver-mode` the CSV needs no `spec.replaces`; OLM orders versions by semver, and skipped versions are fine.
+4. **Commit** with a DCO sign-off whose name and e-mail match the author (`git commit -s -m "operator harbor-resource-operator (X.Y.Z)"`), one operator version per pull request, push, and open the pull request against their `main`. In the description, say what changed against the listed version and how it was tested.
+5. **Their CI** validates the bundle, installs it on kind and checks that the Deployment becomes healthy. Results are in the Checks tab; `/retest` reruns them. With the author in `reviewers`, a green run merges the pull request automatically; the listing updates on operatorhub.io after their release pipeline runs.
+6. **Record it** in the status table below. Published versions are never edited; fixes go out as a new version.
 
 ## 6. Upgrade test (from the second release on)
 
@@ -115,7 +118,7 @@ Same bundle directory, pull request rules and `reviewers`, with two differences:
 | Release workflow, public image and chart | done (v0.1.0) |
 | Bundle tooling, CSV base, samples without Secrets, icon, scorecard config | done |
 | `make bundle-validate` with the operatorframework suite | passes (one false-positive warning, section 2) |
-| Bundle image in the release workflow, signed | done, runs from the next tag |
+| Bundle image in the release workflow, signed | done (from 0.1.1) |
 | Spec and status descriptors, CSV resources | done |
 | OLM install test and scorecard on kind | passed: CSV Succeeded, connection and project Ready, scorecard 6/6 |
 | OperatorHub.io listing | 0.1.2 (k8s-operatorhub/community-operators#9812), 0.1.4 (#9838) and 0.1.5 (#9856) listed; 0.1.3 was never submitted, which `semver-mode` allows |

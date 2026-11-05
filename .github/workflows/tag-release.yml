@@ -1,0 +1,54 @@
+# Tags a release when main gets a new VERSION.
+#
+# A merge into main whose Makefile VERSION has no vX.Y.Z tag yet creates the
+# annotated tag on the merge commit, then starts the Release and Docs
+# workflows on it. They are started by hand (workflow_dispatch) because a tag
+# pushed with GITHUB_TOKEN does not trigger other workflows. Merges that keep
+# the VERSION of an existing tag do nothing. Pushing a tag by hand still works.
+name: Tag release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: tag-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Tag release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the tag
+      actions: write    # start the Release and Docs workflows
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Tag and start the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(sed -n 's/^VERSION ?= //p' Makefile)
+          tag="v$version"
+          if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            echo "$tag exists; nothing to release"
+            exit 0
+          fi
+          if ! ./hack/release-notes.sh "$version" > /dev/null; then
+            echo "::error::CHANGELOG.md has no section for $version"; exit 1
+          fi
+          object=$(gh api "repos/$GITHUB_REPOSITORY/git/tags" -f tag="$tag" -f message="Release $version" \
+            -f object="$GITHUB_SHA" -f type=commit --jq .sha)
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$object" > /dev/null
+          echo "Tagged $GITHUB_SHA as $tag"
+          gh workflow run release.yml --repo "$GITHUB_REPOSITORY" --ref "$tag"
+          gh workflow run docs.yml --repo "$GITHUB_REPOSITORY" --ref "$tag" -f version="$version"
+          echo "### Released $tag" >> "$GITHUB_STEP_SUMMARY"
+          echo "Release and Docs workflows started on $tag." >> "$GITHUB_STEP_SUMMARY"
