@@ -16,3 +16,61 @@
   --md-typeset-a-color: #f58215;
   --md-default-bg-color: #0f1a2e;
 }
+
+/* Product bar above the header: links between the Oreon IT open-source sites. */
+.oreon-products {
+  background-color: #0b1323;
+  color: #c9d1e0;
+  font-size: 0.65rem;
+  line-height: 1.8rem;
+}
+
+.oreon-products__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.8rem;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.oreon-products a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.oreon-products a:hover,
+.oreon-products a:focus {
+  color: #fdb813;
+}
+
+.oreon-products__home {
+  font-weight: 700;
+  color: #ffffff !important;
+}
+
+.oreon-products__sep,
+.oreon-products__label {
+  opacity: 0.6;
+}
+
+.oreon-products__list {
+  display: flex;
+  gap: 1.2rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.oreon-products__current {
+  color: #f58215 !important;
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 #f58215;
+}
+
+@media screen and (max-width: 44.984375em) {
+  .oreon-products__label,
+  .oreon-products__sep {
+    display: none;
+  }
+}

@@ -1,0 +1,24 @@
+{#-
+  Links between the Oreon IT open-source sites on www.oreonit.com. Keep the
+  list and the markup in step with harbor-mcp and helm-charts. extra.product
+  in mkdocs.yml marks the current site.
+-#}
+{% set products = [
+  ("harbor-operator", "Harbor Operator", "https://www.oreonit.com/harbor-operator/"),
+  ("harbor-mcp", "Harbor MCP", "https://www.oreonit.com/harbor-mcp/"),
+  ("helm-charts", "Helm charts", "https://www.oreonit.com/helm-charts/"),
+] %}
+<nav class="oreon-products" aria-label="Oreon IT open source">
+  <div class="oreon-products__inner md-grid">
+    <a class="oreon-products__home" href="https://www.oreonit.com/">Oreon IT</a>
+    <span class="oreon-products__sep" aria-hidden="true">/</span>
+    <span class="oreon-products__label">Open source</span>
+    <ul class="oreon-products__list">
+      {% for key, title, url in products %}
+        <li>
+          <a href="{{ url }}"{% if key == config.extra.product %} class="oreon-products__current" aria-current="page"{% endif %}>{{ title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</nav>

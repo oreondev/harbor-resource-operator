@@ -21,6 +21,7 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - "overrides/**"
       - "CHANGELOG.md"
       - "hack/docs/**"
       - "config/crd/bases/**"
