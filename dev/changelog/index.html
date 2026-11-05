@@ -1808,6 +1808,7 @@
 <h2 id="unreleased">Unreleased<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Documentation site at <a href="https://www.oreonit.com/harbor-operator/">https://www.oreonit.com/harbor-operator/</a>, with a reference page for every kind generated from the CRDs and samples, and these release notes.</li>
+<li><code>HarborProjectMember</code> for a user that does not exist in Harbor now reports <code>Ready=False</code> with reason <code>UserNotFound</code> instead of a generic <code>HarborError</code>, and adds the member at the next sync once the user exists.</li>
 </ul>
 <h2 id="015-2026-11-04">0.1.5 - 2026-11-04<a class="headerlink" href="#015-2026-11-04" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
