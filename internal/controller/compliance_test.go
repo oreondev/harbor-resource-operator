@@ -168,8 +168,14 @@ var _ = Describe("HarborProjectMember", func() {
 			},
 		}
 		Expect(k8sClient.Create(ctx, ghost)).To(Succeed())
-		Eventually(readyOf(ghost), timeout, interval).Should(Equal("False/" + harborv1alpha1.ReasonHarborError))
-		Expect(readyCond(ghost.Status.Conditions).Message).To(ContainSubstring("not found"))
+		Eventually(readyOf(ghost), timeout, interval).Should(Equal("False/" + harborv1alpha1.ReasonUserNotFound))
+		Expect(readyCond(ghost.Status.Conditions).Message).To(ContainSubstring(`user "ghost" does not exist in Harbor`))
+
+		By("adding the member at the next sync once the user exists")
+		harborSrv.AddUser("ghost")
+		Eventually(readyOf(ghost), timeout, interval).Should(Equal("True/" + harborv1alpha1.ReasonSynced))
+		Expect(harborSrv.MembersOf(*proj.Status.ProjectID)).To(ContainElement(And(
+			HaveField("EntityName", "ghost"), HaveField("RoleID", int64(harbor.RoleGuest)))))
 
 		By("deleting the adopted admin membership with Retain keeps it in Harbor")
 		Expect(k8sClient.Delete(ctx, admin)).To(Succeed())

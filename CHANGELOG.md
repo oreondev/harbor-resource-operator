@@ -5,6 +5,7 @@ All notable changes are listed here, newest first. Versions follow [semantic ver
 ## Unreleased
 
 - Documentation site at <https://www.oreonit.com/harbor-operator/>, with a reference page for every kind generated from the CRDs and samples, and these release notes.
+- `HarborProjectMember` for a user that does not exist in Harbor now reports `Ready=False` with reason `UserNotFound` instead of a generic `HarborError`, and adds the member at the next sync once the user exists.
 
 ## 0.1.5 - 2026-11-04
 

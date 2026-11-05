@@ -118,6 +118,7 @@ const (
 	ReasonReconcileInProgress     = "ReconcileInProgress"
 	ReasonExternalResourceMissing = "ExternalResourceMissing"
 	ReasonDuplicate               = "Duplicate"
+	ReasonUserNotFound            = "UserNotFound"
 )
 
 // Finalizer added to every managed kind.
