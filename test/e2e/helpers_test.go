@@ -238,31 +238,86 @@ func pushTestImage(user, pass, repo, tag string) error {
 		"config":        descriptor("application/vnd.oci.image.config.v1+json", cfg),
 		"layers":        []any{descriptor("application/vnd.oci.image.layer.v1.tar+gzip", layer)},
 	})
-	req, _ := http.NewRequest(http.MethodPut, harborURL()+"/v2/"+repo+"/manifests/"+tag, bytes.NewReader(manifest))
+	return putManifest(tok, repo, tag, manifest)
+}
+
+func putManifest(tok, repo, ref string, manifest []byte) error {
+	req, _ := http.NewRequest(http.MethodPut, harborURL()+"/v2/"+repo+"/manifests/"+ref, bytes.NewReader(manifest))
 	req.Header.Set("Authorization", "Bearer "+tok)
 	req.Header.Set("Content-Type", "application/vnd.oci.image.manifest.v1+json")
 	return expectStatus(http.DefaultClient.Do(req))(http.StatusCreated)
 }
 
-func digestOf(b []byte) string {
-	sum := sha256.Sum256(b)
-	return "sha256:" + hex.EncodeToString(sum[:])
+// pushTestSkill pushes an agent skill (agents-skills-oci-artifacts-spec
+// v0.1.0: one tar+gzip layer rooted at <name>/) to repo:tag and returns the
+// manifest digest.
+func pushTestSkill(user, pass, repo, tag, name string) (string, error) {
+	tok, err := registryToken(user, pass, "repository:"+repo+":pull,push")
+	if err != nil {
+		return "", err
+	}
+	skillMD := fmt.Sprintf("---\nname: %s\ndescription: e2e skill %d\n---\n\nSay hello.\n", name, time.Now().UnixNano())
+	layer, _, err := tarGz(map[string]string{name + "/SKILL.md": skillMD})
+	if err != nil {
+		return "", err
+	}
+	cfg, _ := json.Marshal(map[string]string{"name": name, "description": "e2e skill"})
+	for _, blob := range [][]byte{layer, cfg} {
+		if err := pushBlob(tok, repo, blob); err != nil {
+			return "", err
+		}
+	}
+	manifest, _ := json.Marshal(map[string]any{
+		"schemaVersion": 2,
+		"mediaType":     "application/vnd.oci.image.manifest.v1+json",
+		"artifactType":  harbor.SkillArtifactType,
+		"config":        descriptor(harbor.SkillConfigType, cfg),
+		"layers":        []any{descriptor(harbor.SkillContentType, layer)},
+		"annotations":   map[string]string{harbor.SkillNameAnnotation: name, "org.opencontainers.image.version": tag},
+	})
+	return digestOf(manifest), putManifest(tok, repo, tag, manifest)
 }
 
-func descriptor(mediaType string, b []byte) map[string]any {
-	return map[string]any{"mediaType": mediaType, "digest": digestOf(b), "size": len(b)}
+// pushCosignSignature attaches a signature to repo@digest laid out as cosign
+// does (tag sha256-<hex>.sig, simple-signing layer). Harbor records it as an
+// accessory without checking the signature itself.
+func pushCosignSignature(user, pass, repo, digest string) error {
+	tok, err := registryToken(user, pass, "repository:"+repo+":pull,push")
+	if err != nil {
+		return err
+	}
+	payload, _ := json.Marshal(map[string]any{"critical": map[string]any{
+		"identity": map[string]string{"docker-reference": repo}, "image": map[string]string{"docker-manifest-digest": digest},
+		"type": "cosign container image signature"}})
+	cfg, _ := json.Marshal(map[string]any{"architecture": "", "os": "", "config": map[string]any{},
+		"rootfs": map[string]any{"type": "layers", "diff_ids": []string{digestOf(payload)}}})
+	for _, blob := range [][]byte{payload, cfg} {
+		if err := pushBlob(tok, repo, blob); err != nil {
+			return err
+		}
+	}
+	layer := descriptor("application/vnd.dev.cosign.simplesigning.v1+json", payload)
+	layer["annotations"] = map[string]string{"dev.cosignproject.cosign/signature": "ZTJl"}
+	manifest, _ := json.Marshal(map[string]any{
+		"schemaVersion": 2,
+		"mediaType":     "application/vnd.oci.image.manifest.v1+json",
+		"config":        descriptor("application/vnd.oci.image.config.v1+json", cfg),
+		"layers":        []any{layer},
+	})
+	return putManifest(tok, repo, strings.Replace(digest, ":", "-", 1)+".sig", manifest)
 }
 
-// tinyLayer returns a gzipped tar with one file and the digest of the plain tar.
-func tinyLayer(nonce string) ([]byte, string, error) {
+// tarGz packs files (path to content) into a gzipped tar.
+func tarGz(files map[string]string) ([]byte, string, error) {
 	var tarBuf bytes.Buffer
 	tw := tar.NewWriter(&tarBuf)
-	content := []byte("harbor-resource-operator e2e " + nonce + "\n")
-	if err := tw.WriteHeader(&tar.Header{Name: "e2e.txt", Mode: 0o644, Size: int64(len(content))}); err != nil {
-		return nil, "", err
-	}
-	if _, err := tw.Write(content); err != nil {
-		return nil, "", err
+	for name, content := range files {
+		if err := tw.WriteHeader(&tar.Header{Name: name, Mode: 0o644, Size: int64(len(content))}); err != nil {
+			return nil, "", err
+		}
+		if _, err := tw.Write([]byte(content)); err != nil {
+			return nil, "", err
+		}
 	}
 	if err := tw.Close(); err != nil {
 		return nil, "", err
@@ -276,6 +331,20 @@ func tinyLayer(nonce string) ([]byte, string, error) {
 		return nil, "", err
 	}
 	return gz.Bytes(), digestOf(tarBuf.Bytes()), nil
+}
+
+func digestOf(b []byte) string {
+	sum := sha256.Sum256(b)
+	return "sha256:" + hex.EncodeToString(sum[:])
+}
+
+func descriptor(mediaType string, b []byte) map[string]any {
+	return map[string]any{"mediaType": mediaType, "digest": digestOf(b), "size": len(b)}
+}
+
+// tinyLayer returns a gzipped tar with one file and the digest of the plain tar.
+func tinyLayer(nonce string) ([]byte, string, error) {
+	return tarGz(map[string]string{"e2e.txt": "harbor-resource-operator e2e " + nonce + "\n"})
 }
 
 // pushBlob uploads b monolithically: POST to start, PUT with the digest.

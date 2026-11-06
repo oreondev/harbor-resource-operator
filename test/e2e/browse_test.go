@@ -20,6 +20,8 @@ package e2e
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"net/url"
 	"os"
 
@@ -40,6 +42,7 @@ var _ = Describe("Harbor client reads", Ordered, func() {
 	ctx := context.Background()
 	var hc *harbor.Client
 	var projectID int64
+	var skillDigest string
 
 	BeforeAll(func() {
 		hc = harborAdmin()
@@ -53,6 +56,9 @@ var _ = Describe("Harbor client reads", Ordered, func() {
 		for _, tag := range []string{"1.0", "1.1"} {
 			Expect(pushTestImage("admin", harborAdminPassword, browseProject+"/team/app", tag)).To(Succeed())
 		}
+		var err error
+		skillDigest, err = pushTestSkill("admin", harborAdminPassword, browseProject+"/hello-skill", "0.1.0", "hello-skill")
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	AfterAll(func() {
@@ -60,6 +66,7 @@ var _ = Describe("Harbor client reads", Ordered, func() {
 			return
 		}
 		Expect(deleteRepository(browseProject, url.PathEscape("team/app"))).To(Succeed())
+		Expect(deleteRepository(browseProject, "hello-skill")).To(Succeed())
 		repos, total, err := hc.ListRepositories(ctx, browseProject, "", harbor.PageOptions{})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(total).To(BeZero(), "repositories left: %+v", repos)
@@ -81,6 +88,9 @@ var _ = Describe("Harbor client reads", Ordered, func() {
 		Expect(total).To(BeEquivalentTo(1))
 		Expect(repos[0].Name).To(Equal(browseProject + "/team/app"))
 		Expect(repos[0].ArtifactCount).To(BeEquivalentTo(2))
+		_, total, err = hc.ListRepositories(ctx, browseProject, "", harbor.PageOptions{})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(total).To(BeEquivalentTo(2))
 	})
 
 	It("lists artifacts newest first, with tags, by either repository name", func() {
@@ -117,5 +127,57 @@ var _ = Describe("Harbor client reads", Ordered, func() {
 		Expect(harbor.IsNotFound(err)).To(BeTrue(), "%v", err)
 		_, err = hc.GetVulnerabilityReport(ctx, browseProject, "missing", "1.1")
 		Expect(harbor.IsNotFound(err)).To(BeTrue(), "%v", err)
+	})
+
+	It("types an agent skill and serves it through /v2/ under the cosign policy", func() {
+		skills := func(repo string) ([]harbor.Artifact, int64, error) {
+			return hc.ListArtifactsOfType(ctx, browseProject, repo, harbor.ArtifactTypeSkill, harbor.PageOptions{})
+		}
+		arts, total, err := skills("hello-skill")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(total).To(BeEquivalentTo(1))
+		a := arts[0]
+		GinkgoWriter.Printf("skill artifact: type %s, artifact_type %s, extra_attrs %v\n",
+			a.Type, a.ArtifactType, a.ExtraAttrs)
+		Expect(a.Digest).To(Equal(skillDigest))
+		Expect(a.Type).To(Equal(harbor.ArtifactTypeSkill))
+		Expect(a.ArtifactType).To(Equal(harbor.SkillArtifactType))
+		Expect(a.Annotations).To(HaveKeyWithValue(harbor.SkillNameAnnotation, "hello-skill"))
+		Expect(a.ExtraAttrs).To(HaveKeyWithValue("name", "hello-skill"))
+		Expect(a.Signed()).To(BeFalse())
+		_, total, err = skills("team/app")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(total).To(BeZero(), "images are not skills")
+
+		m, err := hc.GetManifest(ctx, browseProject, "hello-skill", "0.1.0")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(m.Digest).To(Equal(skillDigest))
+		Expect(m.Layers).To(HaveLen(1))
+		layer, err := hc.GetBlob(ctx, browseProject, "hello-skill", m.Layers[0], 1<<20)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(layer).To(HaveLen(int(m.Layers[0].Size)))
+
+		// Cosign enforcement refuses the unsigned manifest with 412 and
+		// accepts it once a signature accessory is attached.
+		cosign := func(on string) {
+			Expect(hc.UpdateProject(ctx, projectID, harbor.ProjectReq{
+				Metadata: &harbor.ProjectMetadata{EnableContentTrustCosign: on}})).To(Succeed())
+		}
+		cosign("true")
+		_, err = hc.GetManifest(ctx, browseProject, "hello-skill", "0.1.0")
+		GinkgoWriter.Printf("unsigned skill under the cosign policy: %v\n", err)
+		var apiErr *harbor.APIError
+		Expect(errors.As(err, &apiErr)).To(BeTrue(), "%v", err)
+		Expect(apiErr.StatusCode).To(Equal(http.StatusPreconditionFailed))
+		Expect(apiErr.Message).To(ContainSubstring("not signed by cosign"))
+
+		Expect(pushCosignSignature("admin", harborAdminPassword, browseProject+"/hello-skill", skillDigest)).To(Succeed())
+		arts, _, err = skills("hello-skill")
+		Expect(err).NotTo(HaveOccurred())
+		GinkgoWriter.Printf("skill accessories after signing: %+v\n", arts[0].Accessories)
+		Expect(arts[0].Signed()).To(BeTrue())
+		_, err = hc.GetManifest(ctx, browseProject, "hello-skill", "0.1.0")
+		Expect(err).NotTo(HaveOccurred())
+		cosign("false")
 	})
 })
