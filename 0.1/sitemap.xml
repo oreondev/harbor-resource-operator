@@ -2,78 +2,78 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/OPERATORHUB/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/REQUIREMENTS/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/behaviour/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/changelog/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/install/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/metrics/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/quickstart/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborconnection/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborgarbagecollection/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborimmutablerule/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborlabel/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborproject/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborprojectmember/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborregistry/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborreplicationpolicy/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborretentionpolicy/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborrobotaccount/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
     <url>
          <loc>https://www.oreonit.com/harbor-operator/latest/reference/harborwebhook/</loc>
-         <lastmod>2026-11-05</lastmod>
+         <lastmod>2026-11-07</lastmod>
     </url>
 </urlset>
