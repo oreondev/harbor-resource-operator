@@ -31,13 +31,13 @@ jobs:
         harbor: ${{ fromJSON((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '[{"chart":"1.16.4","app":"2.12"},{"chart":"1.17.5","app":"2.13"},{"chart":"1.18.4","app":"2.14"},{"chart":"1.19.4","app":"2.15"},{"chart":"1.19.4","app":"2.15","k8s":"1.30","node":"kindest/node:v1.30.13@sha256:397209b3d947d154f6641f2d0ce8d473732bd91c87d9575ade99049aa33cd648"}]' || '[{"chart":"1.19.4","app":"2.15"}]') }}
     steps:
       - name: Clone the code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
 
       - name: Setup Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
 
