@@ -1809,6 +1809,7 @@
 <ul>
 <li>Documentation site at <a href="https://www.oreonit.com/harbor-operator/">https://www.oreonit.com/harbor-operator/</a>, with a reference page for every kind generated from the CRDs and samples, and these release notes.</li>
 <li><code>HarborProjectMember</code> for a user that does not exist in Harbor now reports <code>Ready=False</code> with reason <code>UserNotFound</code> instead of a generic <code>HarborError</code>, and adds the member at the next sync once the user exists.</li>
+<li><code>pkg/harbor</code> reads agent skills stored as OCI artifacts: <code>ListArtifactsOfType</code> (with signature accessories), and <code>GetManifest</code> and <code>GetBlob</code> on the registry API with digest and size checks. Artifacts carry <code>artifact_type</code>, annotations and <code>extra_attrs</code>. The fake Harbor serves <code>/v2/</code> manifests and blobs and enforces the cosign pull policy. Used by the Harbor MCP server.</li>
 </ul>
 <h2 id="015-2026-11-04">0.1.5 - 2026-11-04<a class="headerlink" href="#015-2026-11-04" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
