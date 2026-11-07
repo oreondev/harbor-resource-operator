@@ -22,6 +22,9 @@ import (
 	"net/http"
 )
 
+// ErrTooLarge reports a response body above the caller's limit.
+var ErrTooLarge = errors.New("response larger than the limit")
+
 // APIError is a non-2xx answer from Harbor.
 type APIError struct {
 	StatusCode int

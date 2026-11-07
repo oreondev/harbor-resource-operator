@@ -70,6 +70,7 @@ type Server struct {
 	// Browse state; see browse.go.
 	Repositories map[int64]*harbor.Repository
 	Artifacts    map[int64]*artifact
+	blobs        map[int64]map[string][]byte // repository ID, digest
 	// NoScanner mimics a Harbor without a scanner (no Trivy): reports of
 	// existing artifacts answer 404 "no scanner registration configured".
 	NoScanner bool
@@ -103,6 +104,7 @@ func New(username, password string) *Server {
 		Retentions:     map[int64]*harbor.RetentionPolicy{},
 		Repositories:   map[int64]*harbor.Repository{},
 		Artifacts:      map[int64]*artifact{},
+		blobs:          map[int64]map[string][]byte{},
 	}
 	s.Users[username] = 1
 	mux := http.NewServeMux()
@@ -171,6 +173,7 @@ func (s *Server) Reset() {
 	s.GCRuns = nil
 	s.Repositories = map[int64]*harbor.Repository{}
 	s.Artifacts = map[int64]*artifact{}
+	s.blobs = map[int64]map[string][]byte{}
 	s.NoScanner = false
 	s.Requests = nil
 }

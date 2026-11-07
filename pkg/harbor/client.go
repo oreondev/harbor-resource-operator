@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -134,16 +135,6 @@ func (c *Client) Host() string { return c.base.Host }
 // from a 2xx response when non-nil. The response is returned for callers that
 // need headers (Location).
 func (c *Client) do(ctx context.Context, method, path string, query url.Values, body, out any, headers map[string]string) (*http.Response, error) {
-	if c.limiter != nil {
-		if err := c.limiter.Wait(ctx); err != nil {
-			return nil, err
-		}
-	}
-	u := *c.base
-	u.Path = strings.TrimRight(u.Path, "/") + apiPrefix + path
-	if query != nil {
-		u.RawQuery = query.Encode()
-	}
 	var reader io.Reader
 	if body != nil {
 		buf, err := json.Marshal(body)
@@ -152,16 +143,45 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 		}
 		reader = bytes.NewReader(buf)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, u.String(), reader)
+	h := map[string]string{"Accept": "application/json"}
+	if body != nil {
+		h["Content-Type"] = "application/json"
+	}
+	maps.Copy(h, headers)
+	resp, data, err := c.send(ctx, method, apiPrefix+path, path, query, reader, h, 8<<20)
 	if err != nil {
-		return nil, err
+		return resp, err
+	}
+	if out != nil && len(data) > 0 {
+		if err := json.Unmarshal(data, out); err != nil {
+			return resp, fmt.Errorf("harbor %s %s: decode response: %w", method, path, err)
+		}
+	}
+	return resp, nil
+}
+
+// send makes one request to urlPath under the base URL with the client's
+// credentials, rate limit and metrics, and reads at most limit bytes of the
+// body (an error beyond that). label is the path used in errors. A non-2xx
+// answer is an APIError.
+func (c *Client) send(ctx context.Context, method, urlPath, label string, query url.Values, body io.Reader,
+	headers map[string]string, limit int64) (*http.Response, []byte, error) {
+	if c.limiter != nil {
+		if err := c.limiter.Wait(ctx); err != nil {
+			return nil, nil, err
+		}
+	}
+	u := *c.base
+	u.Path = strings.TrimRight(u.Path, "/") + urlPath
+	if query != nil {
+		u.RawQuery = query.Encode()
+	}
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
+	if err != nil {
+		return nil, nil, err
 	}
 	req.SetBasicAuth(c.username, c.password)
-	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", userAgent)
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
@@ -175,22 +195,20 @@ func (c *Client) do(ctx context.Context, method, path string, query url.Values, 
 		c.observe(method, code, time.Since(start))
 	}
 	if err != nil {
-		return nil, fmt.Errorf("harbor %s %s: %w", method, path, err)
+		return nil, nil, fmt.Errorf("harbor %s %s: %w", method, label, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
-	data, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
+	data, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	if err != nil {
-		return nil, fmt.Errorf("harbor %s %s: read body: %w", method, path, err)
+		return nil, nil, fmt.Errorf("harbor %s %s: read body: %w", method, label, err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return resp, &APIError{StatusCode: resp.StatusCode, Method: method, Path: path, Message: errorMessage(data)}
+		return resp, nil, &APIError{StatusCode: resp.StatusCode, Method: method, Path: label, Message: errorMessage(data)}
 	}
-	if out != nil && len(data) > 0 {
-		if err := json.Unmarshal(data, out); err != nil {
-			return resp, fmt.Errorf("harbor %s %s: decode response: %w", method, path, err)
-		}
+	if int64(len(data)) > limit {
+		return resp, nil, fmt.Errorf("harbor %s %s: %w (%d bytes)", method, label, ErrTooLarge, limit)
 	}
-	return resp, nil
+	return resp, data, nil
 }
 
 // errorMessage extracts Harbor's {"errors":[{"code","message"}]} body.
