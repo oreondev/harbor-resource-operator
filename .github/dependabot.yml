@@ -1,0 +1,31 @@
+# Weekly version updates into develop, grouped so a week is one or two PRs.
+# Kubernetes libraries move together (client-go, apimachinery, controller-runtime),
+# so they share a group. The Docker base images are set by a build argument and
+# docs/requirements.txt is a full pip freeze; both are updated by hand.
+# Security updates are enabled in the repository settings.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    groups:
+      kubernetes:
+        patterns:
+          - k8s.io/*
+          - sigs.k8s.io/*
+      go:
+        patterns:
+          - "*"
+    labels: []
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+    labels: []

@@ -36,6 +36,8 @@ type artifact struct {
 	repoID int64
 	a      harbor.Artifact
 	report *harbor.VulnerabilityReport
+	// manifest is the raw manifest served on /v2/, if added with AddManifest.
+	manifest []byte
 }
 
 func (s *Server) registerBrowse(mux *http.ServeMux, p string) {
@@ -43,6 +45,7 @@ func (s *Server) registerBrowse(mux *http.ServeMux, p string) {
 	mux.HandleFunc("GET "+p+"/projects/{id}/repositories", s.listRepositories)
 	mux.HandleFunc("GET "+p+"/projects/{id}/repositories/{repo}/artifacts", s.listArtifacts)
 	mux.HandleFunc("GET "+p+"/projects/{id}/repositories/{repo}/artifacts/{ref}/additions/{addition}", s.getAddition)
+	mux.HandleFunc("GET /v2/", s.registry)
 }
 
 // AddRepository seeds a repository in an existing project and returns its ID
@@ -68,6 +71,10 @@ func (s *Server) AddRepository(project, name string) int64 {
 func (s *Server) AddArtifact(project, repo string, a harbor.Artifact, report *harbor.VulnerabilityReport) int64 {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.addArtifact(project, repo, a, report)
+}
+
+func (s *Server) addArtifact(project, repo string, a harbor.Artifact, report *harbor.VulnerabilityReport) int64 {
 	rp := s.repositoryNamed(project, repo)
 	if rp == nil {
 		return 0
@@ -187,14 +194,19 @@ func (s *Server) listArtifacts(w http.ResponseWriter, r *http.Request) {
 		writePage(w, r, out)
 		return
 	}
-	withScan := r.URL.Query().Get("with_scan_overview") == "true"
+	withScan := r.URL.Query().Get("with_scan_overview") == vTrue
+	withAccessory := r.URL.Query().Get("with_accessory") == vTrue
+	typ, byType := strings.CutPrefix(r.URL.Query().Get("q"), "type=")
 	for _, a := range s.Artifacts {
-		if a.repoID != rp.ID {
+		if a.repoID != rp.ID || (byType && a.a.Type != typ) {
 			continue
 		}
 		c := a.a
 		if !withScan {
 			c.ScanOverview = nil
+		}
+		if !withAccessory {
+			c.Accessories = nil
 		}
 		out = append(out, c)
 	}

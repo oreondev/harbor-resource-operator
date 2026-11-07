@@ -21,6 +21,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -111,6 +112,34 @@ type Artifact struct {
 	Labels         []Label   `json:"labels"`
 	// ScanOverview is keyed by report MIME type.
 	ScanOverview map[string]ScanSummary `json:"scan_overview,omitempty"`
+	// ArtifactType is the manifest's artifactType (OCI 1.1), if set.
+	ArtifactType string            `json:"artifact_type,omitempty"`
+	Annotations  map[string]string `json:"annotations,omitempty"`
+	// ExtraAttrs is the config JSON for artifact types Harbor has no
+	// processor for (agent skills, for one).
+	ExtraAttrs  map[string]any `json:"extra_attrs,omitempty"`
+	Accessories []Accessory    `json:"accessories,omitempty"`
+}
+
+// Artifact types Harbor assigns.
+const (
+	// ArtifactTypeSkill is the type Harbor derives from the config media type
+	// application/vnd.agentskills.skill.config.v1+json.
+	ArtifactTypeSkill = "SKILL"
+)
+
+// AccessoryCosign is the accessory type of a cosign signature.
+const AccessoryCosign = "signature.cosign"
+
+// Accessory is an artifact attached to another one (signature, SBOM).
+type Accessory struct {
+	Type   string `json:"type"`
+	Digest string `json:"digest"`
+}
+
+// Signed reports whether a cosign signature is attached.
+func (a *Artifact) Signed() bool {
+	return slices.ContainsFunc(a.Accessories, func(x Accessory) bool { return x.Type == AccessoryCosign })
 }
 
 // Scan returns the artifact's scan summary, or nil when it was never scanned.
@@ -198,6 +227,14 @@ func (c *Client) ListRepositories(ctx context.Context, project, name string, po 
 func (c *Client) ListArtifacts(ctx context.Context, project, repo string, po PageOptions) ([]Artifact, int64, error) {
 	q := url.Values{"with_tag": {vTrue}, "with_label": {vTrue}, "with_scan_overview": {vTrue}, qSort: {"-push_time"}}
 	return listPage[Artifact](ctx, c, repoPath(project, repo), q, po, acceptVulnerabilities)
+}
+
+// ListArtifactsOfType returns one page of a repository's artifacts of one
+// Harbor type (ArtifactTypeSkill, "IMAGE", ...), newest push first, with tags
+// and accessories.
+func (c *Client) ListArtifactsOfType(ctx context.Context, project, repo, typ string, po PageOptions) ([]Artifact, int64, error) {
+	q := url.Values{"with_tag": {vTrue}, "with_accessory": {vTrue}, "q": {"type=" + typ}, qSort: {"-push_time"}}
+	return listPage[Artifact](ctx, c, repoPath(project, repo), q, po, nil)
 }
 
 // GetVulnerabilityReport returns the scan report of the artifact with the

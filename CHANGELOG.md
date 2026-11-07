@@ -4,7 +4,16 @@ All notable changes are listed here, newest first. Versions follow [semantic ver
 
 ## Unreleased
 
-- Documentation site at <https://www.oreonit.com/harbor-operator/>, with a reference page for every kind generated from the CRDs and samples, and these release notes.
+## 0.1.6 - 2026-11-07
+
+### Added
+
+- Documentation site at <https://www.oreonit.com/harbor-operator/>, with a reference page for every kind generated from the CRDs and samples, and these release notes ([#22](https://github.com/oreondev/harbor-resource-operator/pull/22)).
+- `pkg/harbor` reads agent skills stored as OCI artifacts: `ListArtifactsOfType` (with signature accessories), and `GetManifest` and `GetBlob` on the registry API with digest and size checks. Artifacts carry `artifact_type`, annotations and `extra_attrs`. The fake Harbor serves `/v2/` manifests and blobs and enforces the cosign pull policy. Used by the Harbor MCP server ([#27](https://github.com/oreondev/harbor-resource-operator/pull/27)).
+
+### Fixed
+
+- `HarborProjectMember` for a user that does not exist in Harbor now reports `Ready=False` with reason `UserNotFound` instead of a generic `HarborError`, and adds the member at the next sync once the user exists ([#24](https://github.com/oreondev/harbor-resource-operator/pull/24)).
 
 ## 0.1.5 - 2026-11-04
 

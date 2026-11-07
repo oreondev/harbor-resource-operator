@@ -50,6 +50,7 @@ The client and the fake server follow these; keep them in sync.
 - Pushing a manifest identical to one deleted earlier fails with `MANIFEST_UNKNOWN` on 2.15, so e2e images are unique per push.
 - Listing the artifacts of a missing repository (or project) returns 200 and an empty list, not 404.
 - The vulnerability report of an artifact in a project without a scanner returns 404 `no scanner registration configured for project: <id>`; a missing tag returns 404 `artifact <project>/<repo>:<tag> not found`.
+- An agent skill (config `application/vnd.agentskills.skill.config.v1+json`) is typed `SKILL`, with `artifact_type`, the manifest annotations and the config JSON as `extra_attrs`; `q=type=SKILL` filters artifacts. `/v2/` accepts basic auth. With `enable_content_trust_cosign` on, a manifest pull of an unsigned artifact returns 412 `PROJECTPOLICYVIOLATION` "The image is not signed by cosign."; blob pulls by digest are not checked. A cosign signature is listed as accessory type `signature.cosign`.
 
 ## Branches and releases
 
