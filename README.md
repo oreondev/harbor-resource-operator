@@ -38,10 +38,10 @@ Every kind supports `adoptExisting` (take over an object that already exists in 
 ## Quick start
 
 ```bash
-# 1. Install the operator (replace 0.1.5 with the latest release)
-helm install harbor-resource-operator oci://ghcr.io/oreondev/charts/harbor-resource-operator --version 0.1.5 \
+# 1. Install the operator (replace 0.1.6 with the latest release)
+helm install harbor-resource-operator oci://ghcr.io/oreondev/charts/harbor-resource-operator --version 0.1.6 \
   --namespace harbor-resource-operator-system --create-namespace
-# or: kubectl apply -f https://github.com/oreondev/harbor-resource-operator/releases/download/v0.1.5/install.yaml
+# or: kubectl apply -f https://github.com/oreondev/harbor-resource-operator/releases/download/v0.1.6/install.yaml
 
 # 2. Point it at a Harbor
 kubectl create namespace harbor-system
@@ -70,7 +70,7 @@ The connection's account needs enough Harbor permissions for the kinds you use: 
 Images are signed with cosign (keyless). To verify:
 
 ```bash
-cosign verify ghcr.io/oreondev/harbor-resource-operator:0.1.5 \
+cosign verify ghcr.io/oreondev/harbor-resource-operator:0.1.6 \
   --certificate-identity-regexp '^https://github.com/oreondev/harbor-resource-operator/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```

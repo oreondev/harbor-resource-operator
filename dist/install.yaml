@@ -3914,7 +3914,7 @@ spec:
         - --health-probe-bind-address=:8081
         command:
         - /manager
-        image: ghcr.io/oreondev/harbor-resource-operator:0.1.5
+        image: ghcr.io/oreondev/harbor-resource-operator:0.1.6
         livenessProbe:
           httpGet:
             path: /healthz
