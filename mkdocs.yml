@@ -87,6 +87,7 @@ nav:
   - Guides:
       - How it behaves: behaviour.md
       - Metrics: metrics.md
+      - Agent skills: skills.md
   - Reference:
       - HarborConnection: reference/harborconnection.md
       - HarborProject: reference/harborproject.md

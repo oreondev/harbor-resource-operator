@@ -4,6 +4,8 @@ All notable changes are listed here, newest first. Versions follow [semantic ver
 
 ## Unreleased
 
+- A recipe for an agent skills project (`config/samples/recipes/agent-skills.yaml`, documented on the new Agent skills page): cosign enforcement, immutable version tags, retention, a CI robot that pushes and an agent robot that only reads. A test checks every recipe against the CRD schemas.
+
 ## 0.1.6 - 2026-11-07
 
 ### Added
