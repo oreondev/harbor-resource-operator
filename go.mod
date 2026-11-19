@@ -2,7 +2,7 @@ module github.com/oreondev/harbor-resource-operator
 
 go 1.26.0
 
-toolchain go1.26.10
+toolchain go1.26.11
 
 require (
 	github.com/onsi/ginkgo/v2 v2.34.0
