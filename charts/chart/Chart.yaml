@@ -1,14 +1,47 @@
 apiVersion: v2
 name: harbor-resource-operator
-description: A Helm chart to distribute harbor-resource-operator
+description: Kubernetes operator that manages Harbor projects, robot accounts, replication, members, retention and more as custom resources, through the Harbor API
 type: application
 
 version: 0.1.6
 appVersion: "0.1.6"
 
-keywords:
-  - kubernetes
-  - operator
+home: https://www.oreonit.com/harbor-operator/
+icon: https://www.oreonit.com/harbor-operator/latest/images/icon.svg
+sources:
+  - https://github.com/oreondev/harbor-resource-operator
 
+keywords:
+  - harbor
+  - registry
+  - container registry
+  - operator
+  - robot account
+  - replication
+  - gitops
+
+maintainers:
+  - name: Fahri Cap
+    email: fahri.cap@oreonit.com
+    url: https://www.oreonit.com
+
+# The kubebuilder helm plugin rewrites this file when run with --force: keep
+# everything above "annotations" and the artifacthub.io entries when you
+# regenerate the chart. Artifact Hub reads them for the chart's listing.
 annotations:
   kubebuilder.io/generated-by: kubebuilder
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/operator: "true"
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://www.oreonit.com/harbor-operator/
+    - name: Source code
+      url: https://github.com/oreondev/harbor-resource-operator
+    - name: Release notes
+      url: https://github.com/oreondev/harbor-resource-operator/blob/main/CHANGELOG.md
+    - name: Oreon IT
+      url: https://www.oreonit.com
+  artifacthub.io/maintainers: |
+    - name: Oreon IT
+      email: fahri.cap@oreonit.com

@@ -1,0 +1,9 @@
+# Artifact Hub repository metadata for the chart's OCI repository
+# (oci://ghcr.io/oreondev/charts/harbor-resource-operator). release.yml pushes
+# this file to the registry under the tag "artifacthub.io"; Artifact Hub reads
+# it from there and marks the repository as a verified publisher.
+# https://artifacthub.io/docs/topics/repositories/helm-charts/#oci-support
+repositoryID: 09cb258c-ed43-4bd7-bcf6-76d4b73e1dd6
+owners:
+  - name: Fahri Cap
+    email: fahri.cap@oreonit.com

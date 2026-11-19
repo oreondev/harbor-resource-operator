@@ -4,6 +4,8 @@ All notable changes are listed here, newest first. Versions follow [semantic ver
 
 ## Unreleased
 
+- The Helm chart is listed on [Artifact Hub](https://artifacthub.io/packages/helm/harbor-resource-operator/harbor-resource-operator). The chart now carries a description, links, an icon, maintainers and its own README, and the release workflow publishes the Artifact Hub repository metadata.
+
 ## 0.1.6 - 2026-11-07
 
 ### Added
